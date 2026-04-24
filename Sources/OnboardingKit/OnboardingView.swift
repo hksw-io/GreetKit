@@ -40,8 +40,15 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         GeometryReader { geometry in
             ScrollView {
                 VStack(spacing: self.contentSpacing) {
-                    self.headerSection
-                    self.featuresSection
+                    OnboardingHeaderSection(
+                        content: self.content,
+                        iconSize: self.iconSize)
+                    OnboardingFeatureList(
+                        features: self.content.features,
+                        featureSpacing: self.featureSpacing,
+                        featureIconSize: self.featureIconSize,
+                        featuresVisible: self.featuresVisible,
+                        reduceMotion: self.reduceMotion)
                 }
                 .frame(maxWidth: Tokens.Layout.contentMaxWidth)
                 .frame(maxWidth: .infinity)
@@ -60,7 +67,11 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 ZStack {
-                    self.footerSection
+                    OnboardingFooterSection(
+                        content: self.content,
+                        isLoading: self.isLoading,
+                        onPrimary: self.onPrimary,
+                        onSkip: self.onSkip)
                         .frame(maxWidth: Tokens.Layout.contentMaxWidth)
                         .padding(.horizontal, self.horizontalPadding(for: geometry.size.width))
                 }
@@ -117,10 +128,15 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                 if !newValue { self.errorMessage = nil }
             })
     }
+}
 
-    private var headerSection: some View {
+private struct OnboardingHeaderSection<Content: OnboardingContent>: View {
+    let content: Content
+    let iconSize: CGFloat
+
+    var body: some View {
         VStack(spacing: Tokens.Spacing.large) {
-            if let appIcon = content.appIcon {
+            if let appIcon = self.content.appIcon {
                 appIcon
                     .resizable()
                     .interpolation(.high)
@@ -142,7 +158,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
 
-            if let subtitle = content.subtitle {
+            if let subtitle = self.content.subtitle {
                 subtitle
                     .font(.body)
                     .foregroundStyle(.secondary)
@@ -151,21 +167,42 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             }
         }
     }
+}
 
-    private var featuresSection: some View {
+private struct OnboardingFeatureList: View {
+    let features: [OnboardingFeatureItem]
+    let featureSpacing: CGFloat
+    let featureIconSize: CGFloat
+    let featuresVisible: Bool
+    let reduceMotion: Bool
+
+    var body: some View {
         VStack(spacing: self.featureSpacing) {
-            ForEach(Array(self.content.features.enumerated()), id: \.offset) { index, feature in
-                self.featureRow(feature: feature, index: index)
+            ForEach(Array(self.features.enumerated()), id: \.offset) { index, feature in
+                OnboardingFeatureRow(
+                    feature: feature,
+                    index: index,
+                    featureIconSize: self.featureIconSize,
+                    featuresVisible: self.featuresVisible,
+                    reduceMotion: self.reduceMotion)
             }
         }
     }
+}
 
-    private func featureRow(feature: OnboardingFeatureItem, index: Int) -> some View {
+private struct OnboardingFeatureRow: View {
+    let feature: OnboardingFeatureItem
+    let index: Int
+    let featureIconSize: CGFloat
+    let featuresVisible: Bool
+    let reduceMotion: Bool
+
+    var body: some View {
         let delay = Tokens.Motion.featureBaseDelay + (Double(index) * Tokens.Motion.featureStaggerDelay)
         let isVisible = self.featuresVisible
 
-        return HStack(alignment: .top, spacing: Tokens.Spacing.large) {
-            if let image = feature.image {
+        HStack(alignment: .top, spacing: Tokens.Spacing.large) {
+            if let image = self.feature.image {
                 image
                     .resizable()
                     .scaledToFit()
@@ -176,12 +213,12 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                if let label = feature.label {
+                if let label = self.feature.label {
                     label
                         .font(.headline)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                feature.description
+                self.feature.description
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineSpacing(3)
@@ -199,8 +236,15 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             self.reduceMotion ? nil : .easeOut(duration: Tokens.Motion.revealDuration).delay(delay),
             value: isVisible)
     }
+}
 
-    private var footerSection: some View {
+private struct OnboardingFooterSection<Content: OnboardingContent>: View {
+    let content: Content
+    let isLoading: Bool
+    let onPrimary: () -> Void
+    let onSkip: () -> Void
+
+    var body: some View {
         VStack(spacing: Tokens.Spacing.medium) {
             Button {
                 self.onPrimary()
@@ -223,7 +267,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             .controlSize(.extraLarge)
             .disabled(self.isLoading)
 
-            if let skipText = content.skipButtonText {
+            if let skipText = self.content.skipButtonText {
                 Button {
                     self.onSkip()
                 } label: {
