@@ -249,23 +249,40 @@ private struct OnboardingFooterSection<Content: OnboardingContent>: View {
             Button {
                 self.onPrimary()
             } label: {
-                Group {
-                    if self.isLoading {
+                ZStack {
+                    self.content.primaryButtonText
+                        .font(.body.weight(.semibold))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .opacity(self.isLoading ? 0 : 1)
+
+                    HStack(spacing: Tokens.Spacing.small) {
                         ProgressView()
                             .controlSize(.small)
                             .tint(.white)
-                    } else {
+
                         self.content.primaryButtonText
                             .font(.body.weight(.semibold))
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
                     }
+                    .opacity(self.isLoading ? 1 : 0)
                 }
                 .frame(maxWidth: .infinity, minHeight: 28)
+                .padding(.vertical, Tokens.Platform.buttonVerticalPadding)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(self.content.primaryButtonText)
+                .accessibilityValue(self.isLoading ? Text("Loading") : Text(""))
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.extraLarge)
             .disabled(self.isLoading)
+            #if os(macOS)
+                .environment(\.controlActiveState, .key)
+                .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.large))
+            #else
+                .glassEffect(in: .rect(cornerRadius: Tokens.Radius.large))
+            #endif
 
             if let skipText = self.content.skipButtonText {
                 Button {
