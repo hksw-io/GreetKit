@@ -14,24 +14,28 @@ public struct OnboardingView<Content: OnboardingContent>: View {
 
     private let featureBaseDelay = 0.3
     private let featureStaggerDelay = 0.15
+    private let contentMaxWidth: CGFloat = 560
 
     #if os(macOS)
-        private let iconSize: CGFloat = 64
-        private let featureIconSize: CGFloat = 24
-        private let contentSpacing: CGFloat = 24
-        private let featureSpacing: CGFloat = 20
-        private let topPadding: CGFloat = 32
-        private let bottomPadding: CGFloat = 20
-        private let gradientMaskHeight: CGFloat = 60
+        @ScaledMetric(relativeTo: .largeTitle) private var iconSize: CGFloat = 64
+        @ScaledMetric(relativeTo: .body) private var featureIconSize: CGFloat = 24
+        @ScaledMetric(relativeTo: .body) private var contentSpacing: CGFloat = 24
+        @ScaledMetric(relativeTo: .body) private var featureSpacing: CGFloat = 20
+        @ScaledMetric(relativeTo: .body) private var topPadding: CGFloat = 32
+        @ScaledMetric(relativeTo: .body) private var bottomPadding: CGFloat = 20
+        @ScaledMetric(relativeTo: .body) private var gradientMaskHeight: CGFloat = 60
     #else
-        private let iconSize: CGFloat = 100
-        private let featureIconSize: CGFloat = 35
-        private let contentSpacing: CGFloat = 38
-        private let featureSpacing: CGFloat = 32
-        private let topPadding: CGFloat = 32
-        private let bottomPadding: CGFloat = 24
-        private let gradientMaskHeight: CGFloat = 80
+        @ScaledMetric(relativeTo: .largeTitle) private var iconSize: CGFloat = 100
+        @ScaledMetric(relativeTo: .body) private var featureIconSize: CGFloat = 35
+        @ScaledMetric(relativeTo: .body) private var contentSpacing: CGFloat = 38
+        @ScaledMetric(relativeTo: .body) private var featureSpacing: CGFloat = 32
+        @ScaledMetric(relativeTo: .body) private var topPadding: CGFloat = 32
+        @ScaledMetric(relativeTo: .body) private var bottomPadding: CGFloat = 24
+        @ScaledMetric(relativeTo: .body) private var gradientMaskHeight: CGFloat = 80
     #endif
+
+    @ScaledMetric(relativeTo: .body) private var compactHorizontalPadding: CGFloat = 16
+    @ScaledMetric(relativeTo: .body) private var regularHorizontalPadding: CGFloat = 24
 
     public init(
         content: Content,
@@ -54,10 +58,13 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                     self.headerSection
                     self.featuresSection
                 }
-                .padding(.horizontal, Tokens.Spacing.xLarge)
+                .frame(maxWidth: self.contentMaxWidth)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, self.horizontalPadding(for: geometry.size.width))
                 .padding(.top, self.topPadding)
                 .padding(.bottom, self.bottomPadding)
             }
+            .scrollBounceBehavior(.basedOnSize)
             .onScrollGeometryChange(for: Double.self) { geometry in
                 guard geometry.contentSize.height > 0 else { return 1 }
                 let contentBottom = geometry.contentSize.height + geometry.contentInsets.bottom
@@ -66,22 +73,27 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             } action: { _, newOpacity in
                 self.fadeOpacity = newOpacity
             }
-            .safeAreaInset(edge: .bottom) {
-                self.footerSection
-                    .background(alignment: .top) {
-                        LinearGradient(
-                            colors: [
-                                Tokens.background.opacity(0),
-                                Tokens.background,
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom)
-                            .frame(height: self.gradientMaskHeight)
-                            .offset(y: -self.gradientMaskHeight)
-                            .opacity(self.fadeOpacity)
-                            .allowsHitTesting(false)
-                    }
-                    .background(Tokens.background)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                ZStack {
+                    self.footerSection
+                        .frame(maxWidth: self.contentMaxWidth)
+                        .padding(.horizontal, self.horizontalPadding(for: geometry.size.width))
+                }
+                .frame(maxWidth: .infinity)
+                .background(alignment: .top) {
+                    LinearGradient(
+                        colors: [
+                            Tokens.background.opacity(0),
+                            Tokens.background,
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom)
+                        .frame(height: self.gradientMaskHeight)
+                        .offset(y: -self.gradientMaskHeight)
+                        .opacity(self.fadeOpacity)
+                        .allowsHitTesting(false)
+                }
+                .background(Tokens.background)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
@@ -107,6 +119,10 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             .onAppear {
                 self.featuresVisible = true
             }
+    }
+
+    private func horizontalPadding(for width: CGFloat) -> CGFloat {
+        width < 390 ? self.compactHorizontalPadding : self.regularHorizontalPadding
     }
 
     private var errorPresented: Binding<Bool> {
@@ -138,6 +154,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             #endif
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
 
             if let subtitle = content.subtitle {
@@ -152,7 +169,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
 
     private var featuresSection: some View {
         VStack(spacing: self.featureSpacing) {
-            ForEach(Array(self.content.features.enumerated()), id: \.element.id) { index, feature in
+            ForEach(Array(self.content.features.enumerated()), id: \.offset) { index, feature in
                 self.featureRow(feature: feature, index: index)
             }
         }
@@ -162,7 +179,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         let delay = self.featureBaseDelay + (Double(index) * self.featureStaggerDelay)
         let isVisible = self.featuresVisible
 
-        return HStack(alignment: .center, spacing: Tokens.Spacing.large) {
+        return HStack(alignment: .top, spacing: Tokens.Spacing.large) {
             if let image = feature.image {
                 image
                     .resizable()
@@ -177,6 +194,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                 if let label = feature.label {
                     label
                         .font(.headline)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 feature.description
                     .font(.subheadline)
@@ -184,6 +202,8 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            .multilineTextAlignment(.leading)
+            .layoutPriority(1)
 
             Spacer(minLength: 0)
         }
@@ -208,12 +228,14 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                     } else {
                         self.content.primaryButtonText
                             .font(.body.weight(.semibold))
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .frame(maxWidth: .infinity, minHeight: 28)
             }
             .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .controlSize(.extraLarge)
             .disabled(self.isLoading)
 
             if let skipText = content.skipButtonText {
@@ -222,13 +244,15 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                 } label: {
                     skipText
                         .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
                 .disabled(self.isLoading)
             }
         }
-        .padding(.horizontal, Tokens.Spacing.xLarge)
         .padding(.vertical, Tokens.Spacing.medium)
     }
 }
