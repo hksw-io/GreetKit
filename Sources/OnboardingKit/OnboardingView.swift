@@ -1,3 +1,4 @@
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 public struct OnboardingView<Content: OnboardingContent>: View {
@@ -273,3 +274,4 @@ public struct OnboardingView<Content: OnboardingContent>: View {
     }
     return Host()
 }
+#endif

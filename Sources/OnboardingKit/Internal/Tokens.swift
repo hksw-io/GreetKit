@@ -14,8 +14,10 @@ enum Tokens {
     static var background: Color {
         #if os(macOS)
             Color(nsColor: .windowBackgroundColor)
-        #else
+        #elseif os(iOS)
             Color(.systemBackground)
+        #else
+            Color.black
         #endif
     }
 }
