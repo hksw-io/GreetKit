@@ -286,45 +286,99 @@ private struct OnboardingFooterSection<Content: OnboardingContent>: View {
     }
 }
 
-#Preview("Onboarding") {
-    struct PreviewContent: OnboardingContent {
-        var appIcon: Image? { Image(systemName: "app.gift.fill") }
-        var title: Text { Text("Welcome") }
-        var subtitle: Text? { Text("Here's what makes this app great.") }
-        var features: [OnboardingFeatureItem] {
-            [
-                OnboardingFeatureItem(
-                    image: Image(systemName: "hand.tap.fill"),
-                    label: Text("Tap to flip"),
-                    description: Text("Review cards with a simple tap.")),
-                OnboardingFeatureItem(
-                    image: Image(systemName: "folder.fill"),
-                    label: Text("Organize"),
-                    description: Text("Group cards into decks and folders.")),
-                OnboardingFeatureItem(
-                    image: Image(systemName: "brain.head.profile.fill"),
-                    label: Text("Spaced repetition"),
-                    description: Text("Study smarter, not harder.")),
-            ]
-        }
-        var primaryButtonText: Text { Text("Get started") }
-        var skipButtonText: Text? { Text("Skip for now") }
-        var errorAlertTitle: Text { Text("Something went wrong") }
-        var errorOKText: Text { Text("OK") }
+private struct OnboardingPreviewContent: OnboardingContent {
+    var appIcon: Image? { Image(systemName: "app.gift.fill") }
+    var title: Text { Text("Welcome") }
+    var subtitle: Text? { Text("Here's what makes this app great.") }
+    var features: [OnboardingFeatureItem] {
+        [
+            OnboardingFeatureItem(
+                systemImage: "hand.tap.fill",
+                label: "Tap to flip",
+                description: "Review cards with a simple tap."),
+            OnboardingFeatureItem(
+                systemImage: "folder.fill",
+                label: "Organize",
+                description: "Group cards into decks and folders."),
+            OnboardingFeatureItem(
+                systemImage: "brain.head.profile.fill",
+                label: "Spaced repetition",
+                description: "Study smarter, not harder."),
+        ]
     }
+    var primaryButtonText: Text { Text("Get started") }
+    var skipButtonText: Text? { Text("Skip for now") }
+    var errorAlertTitle: Text { Text("Something went wrong") }
+    var errorOKText: Text { Text("OK") }
+}
 
-    struct Host: View {
-        @State private var isLoading = false
-        @State private var errorMessage: String?
-        var body: some View {
-            OnboardingView(
-                content: PreviewContent(),
-                isLoading: $isLoading,
-                errorMessage: $errorMessage,
-                onPrimary: { isLoading = true },
-                onSkip: {})
+private struct LongOnboardingPreviewContent: OnboardingContent {
+    var appIcon: Image? { Image(systemName: "rectangle.stack.badge.plus.fill") }
+    var title: Text {
+        Text("A much longer onboarding title that must wrap cleanly")
+    }
+    var subtitle: Text? {
+        Text("This subtitle is intentionally longer so narrow presentations and larger Dynamic Type sizes still have room to breathe.")
+    }
+    var features: [OnboardingFeatureItem] {
+        (1...12).map { index in
+            OnboardingFeatureItem(
+                systemImage: "checkmark.circle.fill",
+                label: "Onboarding feature \(index) with a longer localized label",
+                description: "This onboarding description is long enough to wrap over multiple lines while keeping the icon, text, and action area stable.")
         }
     }
-    return Host()
+    var primaryButtonText: Text {
+        Text("Get started with all sample data and preferences")
+    }
+    var skipButtonText: Text? {
+        Text("Skip this longer onboarding flow for now")
+    }
+    var errorAlertTitle: Text { Text("Something went wrong") }
+    var errorOKText: Text { Text("OK") }
+}
+
+#Preview("Onboarding") {
+    @Previewable @State var isLoading = false
+    @Previewable @State var errorMessage: String?
+
+    OnboardingView(
+        content: OnboardingPreviewContent(),
+        isLoading: $isLoading,
+        errorMessage: $errorMessage,
+        onPrimary: { isLoading = true },
+        onSkip: {})
+}
+
+#Preview("Onboarding Long Narrow") {
+    OnboardingView(
+        content: LongOnboardingPreviewContent(),
+        isLoading: .constant(false),
+        errorMessage: .constant(nil),
+        onPrimary: {},
+        onSkip: {})
+        .frame(width: 320, height: 760)
+}
+
+#Preview("Onboarding Loading") {
+    OnboardingView(
+        content: OnboardingPreviewContent(),
+        isLoading: .constant(true),
+        errorMessage: .constant(nil),
+        onPrimary: {},
+        onSkip: {})
+        .frame(width: 390, height: 740)
+}
+
+#Preview("Onboarding Dark Accessibility") {
+    OnboardingView(
+        content: LongOnboardingPreviewContent(),
+        isLoading: .constant(false),
+        errorMessage: .constant(nil),
+        onPrimary: {},
+        onSkip: {})
+        .frame(width: 390, height: 780)
+        .preferredColorScheme(.dark)
+        .dynamicTypeSize(.accessibility2)
 }
 #endif
