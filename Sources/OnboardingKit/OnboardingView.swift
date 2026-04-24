@@ -95,7 +95,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         }
         .interactiveDismissDisabled()
         #if os(macOS)
-            .frame(minWidth: 520, minHeight: 620)
+            .frame(minWidth: Tokens.Layout.compactSheetMinWidth, minHeight: 620)
         #endif
             .alert(
                 self.content.errorAlertTitle,
