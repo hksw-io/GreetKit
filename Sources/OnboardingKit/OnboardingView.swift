@@ -5,6 +5,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
     let content: Content
     @Binding var isLoading: Bool
     @Binding var errorMessage: String?
+    let allowsInteractiveDismissal: Bool
     let onPrimary: () -> Void
     let onSkip: () -> Void
     let onNextStep: (OnboardingNextStepItem) -> Void
@@ -36,6 +37,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         content: Content,
         isLoading: Binding<Bool>,
         errorMessage: Binding<String?>,
+        allowsInteractiveDismissal: Bool = true,
         onPrimary: @escaping () -> Void,
         onSkip: @escaping () -> Void,
         onNextStep: @escaping (OnboardingNextStepItem) -> Void = { _ in })
@@ -43,6 +45,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         self.content = content
         self._isLoading = isLoading
         self._errorMessage = errorMessage
+        self.allowsInteractiveDismissal = allowsInteractiveDismissal
         self.onPrimary = onPrimary
         self.onSkip = onSkip
         self.onNextStep = onNextStep
@@ -56,6 +59,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         content: Content,
         isLoading: Binding<Bool>,
         errorMessage: Binding<String?>,
+        allowsInteractiveDismissal: Bool = true,
         onPrimary: @escaping () -> Void,
         onSkip: @escaping () -> Void,
         onNextStep: @escaping (OnboardingNextStepItem) -> Void = { _ in },
@@ -64,6 +68,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         self.content = content
         self._isLoading = isLoading
         self._errorMessage = errorMessage
+        self.allowsInteractiveDismissal = allowsInteractiveDismissal
         self.onPrimary = onPrimary
         self.onSkip = onSkip
         self.onNextStep = onNextStep
@@ -77,6 +82,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         content: Content,
         isLoading: Binding<Bool>,
         errorMessage: Binding<String?>,
+        allowsInteractiveDismissal: Bool = true,
         onPrimary: @escaping () -> Void,
         onSkip: @escaping () -> Void,
         onNextStep: @escaping (OnboardingNextStepItem) -> Void = { _ in },
@@ -86,6 +92,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         self.content = content
         self._isLoading = isLoading
         self._errorMessage = errorMessage
+        self.allowsInteractiveDismissal = allowsInteractiveDismissal
         self.onPrimary = onPrimary
         self.onSkip = onSkip
         self.onNextStep = onNextStep
@@ -99,6 +106,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         content: Content,
         isLoading: Binding<Bool>,
         errorMessage: Binding<String?>,
+        allowsInteractiveDismissal: Bool = true,
         onPrimary: @escaping () -> Void,
         onSkip: @escaping () -> Void,
         onNextStep: @escaping (OnboardingNextStepItem) -> Void = { _ in },
@@ -107,6 +115,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         self.content = content
         self._isLoading = isLoading
         self._errorMessage = errorMessage
+        self.allowsInteractiveDismissal = allowsInteractiveDismissal
         self.onPrimary = onPrimary
         self.onSkip = onSkip
         self.onNextStep = onNextStep
@@ -120,6 +129,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         content: Content,
         isLoading: Binding<Bool>,
         errorMessage: Binding<String?>,
+        allowsInteractiveDismissal: Bool = true,
         onPrimary: @escaping () -> Void,
         onSkip: @escaping () -> Void,
         onNextStep: @escaping (OnboardingNextStepItem) -> Void = { _ in },
@@ -129,6 +139,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         self.content = content
         self._isLoading = isLoading
         self._errorMessage = errorMessage
+        self.allowsInteractiveDismissal = allowsInteractiveDismissal
         self.onPrimary = onPrimary
         self.onSkip = onSkip
         self.onNextStep = onNextStep
@@ -142,6 +153,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         content: Content,
         isLoading: Binding<Bool>,
         errorMessage: Binding<String?>,
+        allowsInteractiveDismissal: Bool = true,
         onPrimary: @escaping () -> Void,
         onSkip: @escaping () -> Void,
         onNextStep: @escaping (OnboardingNextStepItem) -> Void = { _ in },
@@ -152,6 +164,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         self.content = content
         self._isLoading = isLoading
         self._errorMessage = errorMessage
+        self.allowsInteractiveDismissal = allowsInteractiveDismissal
         self.onPrimary = onPrimary
         self.onSkip = onSkip
         self.onNextStep = onNextStep
@@ -194,6 +207,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                     Text(message)
                 }
             })
+        .interactiveDismissDisabled(!self.allowsInteractiveDismissal)
     }
 
     private var onboardingContent: some View {
@@ -296,7 +310,6 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
-        .interactiveDismissDisabled()
         #if os(macOS)
             .frame(minWidth: Tokens.Layout.compactSheetMinWidth, minHeight: 620)
         #endif

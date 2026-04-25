@@ -245,6 +245,27 @@ struct OnboardingViewBuildTest {
     }
 
     @Test
+    func viewConstructsWithBlockingDismissalPolicy() {
+        struct BlockingContent: OnboardingContent {
+            var title: Text { Text("Blocking") }
+            var features: [OnboardingFeatureItem] {
+                [OnboardingFeatureItem(description: Text("One feature."))]
+            }
+            var primaryButtonText: Text { Text("Continue") }
+            var errorAlertTitle: Text { Text("Error") }
+            var errorOKText: Text { Text("OK") }
+        }
+
+        _ = OnboardingView(
+            content: BlockingContent(),
+            isLoading: .constant(false),
+            errorMessage: .constant(nil),
+            allowsInteractiveDismissal: false,
+            onPrimary: {},
+            onSkip: {})
+    }
+
+    @Test
     func primaryRouteStoresStableID() {
         let route = OnboardingPrimaryRoute(id: "sample-data")
 

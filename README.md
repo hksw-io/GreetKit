@@ -117,6 +117,7 @@ The view is purely presentational:
 
 - `isLoading: Binding<Bool>` — when `true`, the primary button shows a progress spinner and both buttons are disabled.
 - `errorMessage: Binding<String?>` — when non-nil, the view presents an alert. Setting it back to `nil` (or letting the user tap the OK button) dismisses the alert.
+- `allowsInteractiveDismissal` — defaults to `true`. Set it to `false` only for setup flows that must block swipe or window dismissal.
 - `onPrimary` / `onSkip` — fired on tap. Your state layer handles the rest.
 - `primaryRoutes` / `primaryRouteDestination` — optional chained follow-up routes opened by the primary button with in-sheet slide transitions. The package supplies Next and Done controls.
 - `primaryDestination` — convenience API for a single follow-up route. `onPrimary` still fires before the route opens.
