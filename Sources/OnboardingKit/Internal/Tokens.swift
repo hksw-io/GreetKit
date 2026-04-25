@@ -20,6 +20,8 @@ enum Tokens {
         static let compactWidthBreakpoint: CGFloat = 390
         static let compactSheetMinWidth: CGFloat = 320
         static let footerVerticalPadding: CGFloat = 20
+        static let minimumControlHeight: CGFloat = 44
+        static let buttonLabelMinHeight: CGFloat = 28
     }
 
     enum Motion {

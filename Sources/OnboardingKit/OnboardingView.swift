@@ -487,6 +487,17 @@ enum ScrollEdgeFade {
     }
 }
 
+enum OnboardingAccessibilityText {
+    static func nextStepHint(for presentation: OnboardingNextStepPresentation) -> String {
+        switch presentation {
+        case .push:
+            "Opens a follow-up screen."
+        case .sheet:
+            "Presents a follow-up sheet."
+        }
+    }
+}
+
 private enum OnboardingRouteTransitionDirection {
     case forward
     case backward
@@ -551,7 +562,7 @@ private struct OnboardingPrimaryRouteDestinationContainer<Content: OnboardingCon
                         .font(.body.weight(.semibold))
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, minHeight: Tokens.Layout.buttonLabelMinHeight)
                         .padding(.vertical, Tokens.Platform.buttonVerticalPadding)
                 }
                 .buttonStyle(.borderedProminent)
@@ -752,6 +763,8 @@ private struct OnboardingNextStepRow: View {
     let isActionable: Bool
     let onNextStep: (OnboardingNextStepItem) -> Void
 
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
     var body: some View {
         let delay = Tokens.Motion.featureBaseDelay + (Double(self.index) * Tokens.Motion.featureStaggerDelay)
 
@@ -770,17 +783,28 @@ private struct OnboardingNextStepRow: View {
         }
         .padding(Tokens.Spacing.medium)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.thinMaterial, in: .rect(cornerRadius: Tokens.Radius.large))
+        .background(self.rowBackgroundStyle, in: .rect(cornerRadius: Tokens.Radius.large))
         .overlay {
             RoundedRectangle(cornerRadius: Tokens.Radius.large)
                 .stroke(.quaternary, lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
+        .modifier(OnboardingNextStepAccessibilityModifier(
+            isActionable: self.isActionable,
+            presentation: self.step.presentation))
         .opacity(self.isVisible ? 1 : 0)
         .offset(y: self.isVisible ? 0 : (self.reduceMotion ? 0 : Tokens.Motion.revealOffset))
         .animation(
             self.reduceMotion ? nil : .easeOut(duration: Tokens.Motion.revealDuration).delay(delay),
             value: self.isVisible)
+    }
+
+    private var rowBackgroundStyle: AnyShapeStyle {
+        if self.reduceTransparency {
+            AnyShapeStyle(Tokens.background)
+        } else {
+            AnyShapeStyle(.thinMaterial)
+        }
     }
 
     private var content: some View {
@@ -866,7 +890,7 @@ private struct OnboardingFooterSection<Content: OnboardingContent>: View {
                     }
                     .opacity(self.isLoading ? 1 : 0)
                 }
-                .frame(maxWidth: .infinity, minHeight: 28)
+                .frame(maxWidth: .infinity, minHeight: Tokens.Layout.buttonLabelMinHeight)
                 .padding(.vertical, Tokens.Platform.buttonVerticalPadding)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(self.content.primaryButtonText)
@@ -890,7 +914,7 @@ private struct OnboardingFooterSection<Content: OnboardingContent>: View {
                         .font(.subheadline)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, minHeight: Tokens.Layout.minimumControlHeight)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
@@ -898,6 +922,20 @@ private struct OnboardingFooterSection<Content: OnboardingContent>: View {
             }
         }
         .padding(.vertical, Tokens.Layout.footerVerticalPadding)
+    }
+}
+
+private struct OnboardingNextStepAccessibilityModifier: ViewModifier {
+    let isActionable: Bool
+    let presentation: OnboardingNextStepPresentation
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if self.isActionable {
+            content.accessibilityHint(Text(OnboardingAccessibilityText.nextStepHint(for: self.presentation)))
+        } else {
+            content
+        }
     }
 }
 

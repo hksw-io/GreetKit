@@ -165,6 +165,16 @@ struct OnboardingViewBuildTest {
     }
 
     @Test
+    func nextStepAccessibilityHintDescribesPushPresentation() {
+        #expect(OnboardingAccessibilityText.nextStepHint(for: .push) == "Opens a follow-up screen.")
+    }
+
+    @Test
+    func nextStepAccessibilityHintDescribesSheetPresentation() {
+        #expect(OnboardingAccessibilityText.nextStepHint(for: .sheet) == "Presents a follow-up sheet.")
+    }
+
+    @Test
     func featureInitializerStoresStableID() {
         let feature = OnboardingFeatureItem(
             id: "stable-feature",
