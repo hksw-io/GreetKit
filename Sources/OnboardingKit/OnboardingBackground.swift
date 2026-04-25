@@ -125,76 +125,116 @@ private struct OnboardingAnimatedMeshBackground: View {
                 ? 0
                 : timeline.date.timeIntervalSinceReferenceDate / Self.cycleDuration
 
-            ZStack {
-                Tokens.background
+            GeometryReader { geometry in
+                let baseSize = max(geometry.size.width, geometry.size.height)
+                let centers = OnboardingAnimatedGradientMotion.centers(
+                    phase: phase,
+                    reduceMotion: self.reduceMotion)
 
-                LinearGradient(
-                    colors: [
-                        self.primary.opacity(0.18),
-                        self.secondary.opacity(0.16),
-                        self.accent.opacity(0.14),
-                        self.primary.opacity(0.12),
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing)
+                ZStack {
+                    Tokens.background
 
-                MeshGradient(
-                    width: 3,
-                    height: 3,
-                    points: OnboardingAnimatedMeshGeometry.points(
-                        phase: phase,
-                        reduceMotion: self.reduceMotion),
-                    colors: self.colors)
-                    .opacity(0.86)
+                    LinearGradient(
+                        colors: [
+                            self.primary.opacity(0.18),
+                            self.secondary.opacity(0.16),
+                            self.accent.opacity(0.14),
+                            self.primary.opacity(0.12),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing)
 
-                LinearGradient(
-                    colors: [
-                        Tokens.background.opacity(0.10),
-                        Tokens.background.opacity(0.24),
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom)
+                    OnboardingAnimatedGradientBlob(
+                        color: self.primary,
+                        opacity: 0.34,
+                        center: centers[0],
+                        diameter: baseSize * 1.25,
+                        aspectRatio: 0.86,
+                        containerSize: geometry.size)
+
+                    OnboardingAnimatedGradientBlob(
+                        color: self.secondary,
+                        opacity: 0.30,
+                        center: centers[1],
+                        diameter: baseSize * 1.35,
+                        aspectRatio: 0.78,
+                        containerSize: geometry.size)
+
+                    OnboardingAnimatedGradientBlob(
+                        color: self.accent,
+                        opacity: 0.32,
+                        center: centers[2],
+                        diameter: baseSize * 1.20,
+                        aspectRatio: 0.90,
+                        containerSize: geometry.size)
+
+                    OnboardingAnimatedGradientBlob(
+                        color: self.primary,
+                        opacity: 0.20,
+                        center: centers[3],
+                        diameter: baseSize * 1.45,
+                        aspectRatio: 0.72,
+                        containerSize: geometry.size)
+
+                    LinearGradient(
+                        colors: [
+                            Tokens.background.opacity(0.08),
+                            Tokens.background.opacity(0.22),
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom)
+                }
             }
         }
     }
+}
 
-    private var colors: [Color] {
-        [
-            self.primary.opacity(0.34),
-            self.secondary.opacity(0.28),
-            self.accent.opacity(0.30),
-            self.secondary.opacity(0.32),
-            self.primary.opacity(0.26),
-            self.accent.opacity(0.34),
-            self.accent.opacity(0.28),
-            self.secondary.opacity(0.30),
-            self.primary.opacity(0.32),
-        ]
+private struct OnboardingAnimatedGradientBlob: View {
+    let color: Color
+    let opacity: Double
+    let center: CGPoint
+    let diameter: CGFloat
+    let aspectRatio: CGFloat
+    let containerSize: CGSize
+
+    var body: some View {
+        Ellipse()
+            .fill(
+                RadialGradient(
+                    colors: [
+                        self.color.opacity(self.opacity),
+                        self.color.opacity(self.opacity * 0.36),
+                        self.color.opacity(0),
+                    ],
+                    center: .center,
+                    startRadius: 0,
+                    endRadius: self.diameter * 0.56))
+            .frame(width: self.diameter, height: self.diameter * self.aspectRatio)
+            .position(
+                x: self.center.x * self.containerSize.width,
+                y: self.center.y * self.containerSize.height)
+            .blur(radius: self.diameter * 0.08)
+            .allowsHitTesting(false)
     }
 }
 
-enum OnboardingAnimatedMeshGeometry {
-    static func points(phase: Double, reduceMotion: Bool) -> [SIMD2<Float>] {
+enum OnboardingAnimatedGradientMotion {
+    static func centers(phase: Double, reduceMotion: Bool) -> [CGPoint] {
         let phase = reduceMotion ? 0 : phase
         let baseAngle = phase * .pi * 2
         let slowAngle = (phase * 0.63 * .pi * 2) + 1.4
         let fastAngle = (phase * 1.21 * .pi * 2) + 2.1
 
         return [
-            self.point(0, 0),
-            self.point(0.47 + (0.08 * sin(baseAngle)), 0.03 + (0.03 * cos(slowAngle))),
-            self.point(1, 0),
-            self.point(0.04 + (0.05 * cos(slowAngle)), 0.46 + (0.10 * sin(fastAngle))),
-            self.point(0.50 + (0.11 * sin(slowAngle)), 0.50 + (0.10 * cos(baseAngle))),
-            self.point(0.96 + (0.03 * sin(fastAngle)), 0.54 + (0.10 * cos(slowAngle))),
-            self.point(0, 1),
-            self.point(0.52 + (0.10 * cos(fastAngle)), 0.96 + (0.03 * sin(baseAngle))),
-            self.point(1, 1),
+            self.point(0.22 + (0.14 * sin(baseAngle)), 0.16 + (0.10 * cos(slowAngle))),
+            self.point(0.78 + (0.12 * cos(slowAngle)), 0.24 + (0.12 * sin(fastAngle))),
+            self.point(0.28 + (0.10 * sin(fastAngle)), 0.76 + (0.12 * cos(baseAngle))),
+            self.point(0.76 + (0.12 * cos(baseAngle)), 0.72 + (0.12 * sin(slowAngle))),
         ]
     }
 
-    private static func point(_ x: Double, _ y: Double) -> SIMD2<Float> {
-        SIMD2(Float(min(1, max(0, x))), Float(min(1, max(0, y))))
+    private static func point(_ x: Double, _ y: Double) -> CGPoint {
+        CGPoint(x: min(1, max(0, x)), y: min(1, max(0, y)))
     }
 }
 

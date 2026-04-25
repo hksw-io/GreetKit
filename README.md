@@ -113,7 +113,7 @@ Built-in options:
 - `.system` — the default platform background.
 - `.softGradient` — a restrained blue/mint background tuned for readable onboarding content.
 - `.linearGradient(colors:startPoint:endPoint:)` — app-provided colors with the library-managed footer treatment.
-- `.animatedMesh(primary:secondary:accent:)` — an opt-in full-surface animated mesh gradient. It keeps a tinted base across the whole sheet and automatically becomes static when Reduce Motion is enabled.
+- `.animatedMesh(primary:secondary:accent:)` — an opt-in smooth full-surface animated gradient. It keeps a tinted base across the whole sheet and automatically becomes static when Reduce Motion is enabled.
 - `.custom { context in ... }` — a fully custom SwiftUI background. Use `context.reduceMotion` to keep custom animations accessible.
 
 Destination views can still draw their own backgrounds. If they do, that local destination background appears above the onboarding background.
