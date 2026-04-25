@@ -6,6 +6,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
     @Binding var isLoading: Bool
     @Binding var errorMessage: String?
     let allowsInteractiveDismissal: Bool
+    private var background: OnboardingBackground = .system
     let onPrimary: () -> Void
     let onSkip: () -> Void
     let onNextStep: (OnboardingNextStepItem) -> Void
@@ -210,35 +211,48 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         .interactiveDismissDisabled(!self.allowsInteractiveDismissal)
     }
 
+    public func onboardingBackground(_ background: OnboardingBackground) -> Self {
+        var view = self
+        view.background = background
+        return view
+    }
+
     private var onboardingContent: some View {
         ZStack {
-            if let activePrimaryRoute = self.activePrimaryRoute,
-               let primaryRouteDestination = self.primaryRouteDestination
-            {
-                OnboardingPrimaryRouteDestinationContainer(
-                    content: self.content,
-                    destination: primaryRouteDestination(activePrimaryRoute.route),
-                    index: activePrimaryRoute.index,
-                    count: self.content.primaryRoutes.count,
-                    onNext: {
-                        self.openPrimaryRoute(after: activePrimaryRoute.index)
-                    },
-                    onDone: self.completePrimaryRoutes)
-                    .id("primary-route-\(activePrimaryRoute.route.id)")
-                    .transition(self.routeTransition)
-            } else if self.activePrimaryDestination, let primaryDestination = self.primaryDestination {
-                OnboardingPrimaryDestinationContainer(
-                    destination: primaryDestination())
-                    .id("primary-destination")
-                    .transition(self.routeTransition)
-            } else {
-                self.onboardingOverview
-                    .id("overview")
-                    .transition(self.routeTransition)
+            OnboardingBackgroundView(
+                background: self.background,
+                reduceMotion: self.reduceMotion)
+
+            ZStack {
+                if let activePrimaryRoute = self.activePrimaryRoute,
+                   let primaryRouteDestination = self.primaryRouteDestination
+                {
+                    OnboardingPrimaryRouteDestinationContainer(
+                        content: self.content,
+                        background: self.background,
+                        destination: primaryRouteDestination(activePrimaryRoute.route),
+                        index: activePrimaryRoute.index,
+                        count: self.content.primaryRoutes.count,
+                        onNext: {
+                            self.openPrimaryRoute(after: activePrimaryRoute.index)
+                        },
+                        onDone: self.completePrimaryRoutes)
+                        .id("primary-route-\(activePrimaryRoute.route.id)")
+                        .transition(self.routeTransition)
+                } else if self.activePrimaryDestination, let primaryDestination = self.primaryDestination {
+                    OnboardingPrimaryDestinationContainer(
+                        destination: primaryDestination())
+                        .id("primary-destination")
+                        .transition(self.routeTransition)
+                } else {
+                    self.onboardingOverview
+                        .id("overview")
+                        .transition(self.routeTransition)
+                }
             }
+            .animation(self.routeAnimation, value: self.primaryRoutePhaseID)
         }
         .clipped()
-        .animation(self.routeAnimation, value: self.primaryRoutePhaseID)
     }
 
     private var onboardingOverview: some View {
@@ -298,7 +312,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                     LinearGradient(
                         colors: [
                             Tokens.background.opacity(0),
-                            Tokens.background,
+                            self.background.footerFadeEndColor,
                         ],
                         startPoint: .top,
                         endPoint: .bottom)
@@ -307,7 +321,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                         .opacity(self.scrollEdgeFadeOpacity)
                         .allowsHitTesting(false)
                 }
-                .background(Tokens.background)
+                .background(self.background.footerSurfaceStyle)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
@@ -521,6 +535,17 @@ private struct PresentedOnboardingNextStep: Identifiable, Hashable {
     }
 }
 
+private struct OnboardingBackgroundView: View {
+    let background: OnboardingBackground
+    let reduceMotion: Bool
+
+    var body: some View {
+        self.background
+            .makeView(context: OnboardingBackgroundContext(reduceMotion: self.reduceMotion))
+            .ignoresSafeArea()
+    }
+}
+
 private struct OnboardingPrimaryDestinationContainer<Destination: View>: View {
     let destination: Destination
 
@@ -529,7 +554,6 @@ private struct OnboardingPrimaryDestinationContainer<Destination: View>: View {
             self.destination
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(Tokens.background)
         #if os(macOS)
             .frame(minWidth: Tokens.Layout.compactSheetMinWidth, minHeight: 620)
         #endif
@@ -538,6 +562,7 @@ private struct OnboardingPrimaryDestinationContainer<Destination: View>: View {
 
 private struct OnboardingPrimaryRouteDestinationContainer<Content: OnboardingContent, Destination: View>: View {
     let content: Content
+    let background: OnboardingBackground
     let destination: Destination
     let index: Int
     let count: Int
@@ -575,11 +600,10 @@ private struct OnboardingPrimaryRouteDestinationContainer<Content: OnboardingCon
                 .padding(.horizontal, self.horizontalPadding(for: geometry.size.width))
                 .padding(.vertical, Tokens.Layout.footerVerticalPadding)
                 .frame(maxWidth: .infinity)
-                .background(Tokens.background)
+                .background(self.background.footerSurfaceStyle)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
-        .background(Tokens.background)
         #if os(macOS)
             .frame(minWidth: Tokens.Layout.compactSheetMinWidth, minHeight: 620)
         #endif
@@ -1054,6 +1078,40 @@ private struct LongOnboardingPreviewContent: OnboardingContent {
         nextStepDestination: { step in
             OnboardingNextStepPreviewDestination(step: step)
         })
+}
+
+#Preview("Onboarding Soft Gradient") {
+    OnboardingView(
+        content: OnboardingPreviewContent(),
+        isLoading: .constant(false),
+        errorMessage: .constant(nil),
+        onPrimary: {},
+        onSkip: {},
+        primaryRouteDestination: { route in
+            OnboardingPrimaryRoutePreviewDestination(route: route)
+        },
+        nextStepDestination: { step in
+            OnboardingNextStepPreviewDestination(step: step)
+        })
+        .onboardingBackground(.softGradient)
+        .frame(width: 390, height: 740)
+}
+
+#Preview("Onboarding Animated Background") {
+    OnboardingView(
+        content: OnboardingPreviewContent(),
+        isLoading: .constant(false),
+        errorMessage: .constant(nil),
+        onPrimary: {},
+        onSkip: {},
+        primaryRouteDestination: { route in
+            OnboardingPrimaryRoutePreviewDestination(route: route)
+        },
+        nextStepDestination: { step in
+            OnboardingNextStepPreviewDestination(step: step)
+        })
+        .onboardingBackground(.animatedMesh())
+        .frame(width: 390, height: 740)
 }
 
 #Preview("Onboarding Long Narrow") {

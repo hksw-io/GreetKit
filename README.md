@@ -126,6 +126,30 @@ For a chained setup flow, provide `primaryRoutes` and `primaryRouteDestination`.
 
 For optional follow-up actions, provide `nextSteps` and `nextStepDestination`. Use `presentation: .push` to keep the user in the current onboarding flow, or `.sheet` for a focused setup task.
 
+## Backgrounds
+
+The default background is the system sheet surface. Use `onboardingBackground(_:)` when an app needs a more branded first-run experience:
+
+```swift
+OnboardingView(
+    content: MyOnboarding(),
+    isLoading: $isLoading,
+    errorMessage: $errorMessage,
+    onPrimary: {},
+    onSkip: {})
+    .onboardingBackground(.softGradient)
+```
+
+Built-in options:
+
+- `.system` — the default platform background.
+- `.softGradient` — a restrained blue/mint background tuned for readable onboarding content.
+- `.linearGradient(colors:startPoint:endPoint:)` — app-provided colors with the library-managed footer treatment.
+- `.animatedMesh(primary:secondary:accent:)` — an opt-in animated mesh gradient. It automatically becomes static when Reduce Motion is enabled.
+- `.custom { context in ... }` — a fully custom SwiftUI background. Use `context.reduceMotion` to keep custom animations accessible.
+
+Destination views can still draw their own backgrounds. If they do, that local destination background appears above the onboarding background.
+
 ## State ownership
 
 The view is purely presentational:

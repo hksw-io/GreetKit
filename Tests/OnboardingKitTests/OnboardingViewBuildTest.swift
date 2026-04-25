@@ -198,6 +198,74 @@ struct OnboardingViewBuildTest {
     }
 
     @Test
+    func viewConstructsWithSystemBackgroundModifier() {
+        _ = self.backgroundView(.system)
+    }
+
+    @Test
+    func viewConstructsWithSoftGradientBackground() {
+        _ = self.backgroundView(.softGradient)
+    }
+
+    @Test
+    func viewConstructsWithLinearGradientBackground() {
+        _ = self.backgroundView(.linearGradient(
+            colors: [.blue.opacity(0.18), .mint.opacity(0.12), .clear],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing))
+    }
+
+    @Test
+    func viewConstructsWithAnimatedMeshBackground() {
+        _ = self.backgroundView(.animatedMesh())
+    }
+
+    @Test
+    func viewConstructsWithCustomBackground() {
+        _ = self.backgroundView(.custom { context in
+            LinearGradient(
+                colors: [
+                    Color.blue.opacity(context.reduceMotion ? 0.10 : 0.18),
+                    Color.purple.opacity(0.12),
+                ],
+                startPoint: .top,
+                endPoint: .bottom)
+        })
+    }
+
+    @Test
+    func viewConstructsWithBackgroundAndPrimaryRouteChain() {
+        _ = OnboardingView(
+            content: BackgroundRouteContent(),
+            isLoading: .constant(false),
+            errorMessage: .constant(nil),
+            onPrimary: {},
+            onSkip: {},
+            onPrimaryRoutesComplete: {},
+            primaryRouteDestination: { route in
+                Text(route.id)
+            })
+            .onboardingBackground(.animatedMesh())
+    }
+
+    @Test
+    func animatedMeshPointsAreStableWithReduceMotion() {
+        let first = OnboardingAnimatedMeshGeometry.points(phase: 0, reduceMotion: true)
+        let second = OnboardingAnimatedMeshGeometry.points(phase: 0.5, reduceMotion: true)
+
+        #expect(first[4].x == second[4].x)
+        #expect(first[4].y == second[4].y)
+    }
+
+    @Test
+    func animatedMeshPointsChangeAcrossPhases() {
+        let first = OnboardingAnimatedMeshGeometry.points(phase: 0, reduceMotion: false)
+        let second = OnboardingAnimatedMeshGeometry.points(phase: 0.25, reduceMotion: false)
+
+        #expect(abs(first[4].x - second[4].x) > 0.0001)
+    }
+
+    @Test
     func scrollEdgeFadeQuantizesOpacity() {
         let opacity = ScrollEdgeFade.opacity(
             contentHeight: 1_000,
@@ -507,5 +575,41 @@ struct OnboardingViewBuildTest {
             onPrimary: {},
             onSkip: {})
     }
+
+    private func backgroundView(_ background: OnboardingBackground) -> some View {
+        OnboardingView(
+            content: BackgroundContent(),
+            isLoading: .constant(false),
+            errorMessage: .constant(nil),
+            onPrimary: {},
+            onSkip: {})
+            .onboardingBackground(background)
+    }
+}
+
+private struct BackgroundContent: OnboardingContent {
+    var title: Text { Text("Background") }
+    var features: [OnboardingFeatureItem] {
+        [OnboardingFeatureItem(id: "background-feature", description: Text("Background feature."))]
+    }
+    var primaryButtonText: Text { Text("Continue") }
+    var errorAlertTitle: Text { Text("Error") }
+    var errorOKText: Text { Text("OK") }
+}
+
+private struct BackgroundRouteContent: OnboardingContent {
+    var title: Text { Text("Background route") }
+    var features: [OnboardingFeatureItem] {
+        [OnboardingFeatureItem(id: "background-route-feature", description: Text("Background route feature."))]
+    }
+    var primaryRoutes: [OnboardingPrimaryRoute] {
+        [
+            OnboardingPrimaryRoute(id: "first-route"),
+            OnboardingPrimaryRoute(id: "second-route"),
+        ]
+    }
+    var primaryButtonText: Text { Text("Continue") }
+    var errorAlertTitle: Text { Text("Error") }
+    var errorOKText: Text { Text("OK") }
 }
 #endif
