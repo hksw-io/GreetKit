@@ -175,6 +175,28 @@ struct OnboardingViewBuildTest {
     }
 
     @Test
+    func scrollEdgeFadeQuantizesOpacity() {
+        let opacity = ScrollEdgeFade.opacity(
+            contentHeight: 1_000,
+            contentBottomInset: 0,
+            visibleMaxY: 955,
+            fadeHeight: 100)
+
+        #expect(opacity == 0.45)
+    }
+
+    @Test
+    func scrollEdgeFadeIsOpaqueAtScrollEnd() {
+        let opacity = ScrollEdgeFade.opacity(
+            contentHeight: 1_000,
+            contentBottomInset: 0,
+            visibleMaxY: 1_000,
+            fadeHeight: 100)
+
+        #expect(opacity == 0)
+    }
+
+    @Test
     func viewConstructsWithPrimaryDestination() {
         struct PrimaryRouteContent: OnboardingContent {
             var title: Text { Text("Primary") }

@@ -273,12 +273,15 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             }
             .scrollBounceBehavior(.basedOnSize)
             .onScrollGeometryChange(for: Double.self) { geometry in
-                guard geometry.contentSize.height > 0 else { return 1 }
-                let contentBottom = geometry.contentSize.height + geometry.contentInsets.bottom
-                let distance = contentBottom - geometry.visibleRect.maxY
-                return min(1, max(0, distance / self.scrollEdgeFadeHeight))
+                ScrollEdgeFade.opacity(
+                    contentHeight: geometry.contentSize.height,
+                    contentBottomInset: geometry.contentInsets.bottom,
+                    visibleMaxY: geometry.visibleRect.maxY,
+                    fadeHeight: self.scrollEdgeFadeHeight)
             } action: { _, newOpacity in
-                self.scrollEdgeFadeOpacity = newOpacity
+                if self.scrollEdgeFadeOpacity != newOpacity {
+                    self.scrollEdgeFadeOpacity = newOpacity
+                }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 ZStack {
@@ -438,6 +441,34 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             set: { newValue in
                 if !newValue { self.errorMessage = nil }
             })
+    }
+}
+
+enum ScrollEdgeFade {
+    static let opacityStep = 0.05
+
+    static func opacity(
+        contentHeight: CGFloat,
+        contentBottomInset: CGFloat,
+        visibleMaxY: CGFloat,
+        fadeHeight: CGFloat) -> Double
+    {
+        guard contentHeight > 0, fadeHeight > 0 else {
+            return 1
+        }
+
+        let contentBottom = contentHeight + contentBottomInset
+        let distance = contentBottom - visibleMaxY
+        let rawOpacity = Double(min(1, max(0, distance / fadeHeight)))
+        return self.quantize(rawOpacity)
+    }
+
+    static func quantize(_ opacity: Double, step: Double = Self.opacityStep) -> Double {
+        guard step > 0 else {
+            return opacity
+        }
+
+        return (opacity / step).rounded() * step
     }
 }
 
