@@ -165,12 +165,12 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             .animation(self.routeAnimation, value: self.primaryRoutePhaseID)
         }
         .clipped()
-        .scrollIndicators(.hidden)
+        .scrollIndicators(.never, axes: .vertical)
     }
 
     private var onboardingOverview: some View {
         GeometryReader { geometry in
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: self.contentSpacing) {
                     OnboardingHeaderSection(
                         content: self.content,
@@ -194,7 +194,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                         containerHeight: geometry.size.height,
                         footerFrame: self.footerFrame))
             }
-            .scrollIndicators(.hidden)
+            .scrollIndicators(.never, axes: .vertical)
             .scrollBounceBehavior(.basedOnSize)
             .onScrollGeometryChange(for: Double.self) { geometry in
                 ScrollEdgeFade.opacity(
