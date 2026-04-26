@@ -2,20 +2,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "OnboardingKit",
+    name: "GreetKit",
     platforms: [
         .iOS(.v26),
         .macOS(.v26),
     ],
     products: [
         .library(
-            name: "OnboardingKit",
-            targets: ["OnboardingKit"]),
+            name: "GreetKit",
+            targets: ["GreetKit"]),
     ],
     targets: [
         .target(
-            name: "OnboardingKit"),
+            name: "GreetKit"),
         .testTarget(
-            name: "OnboardingKitTests",
-            dependencies: ["OnboardingKit"]),
+            name: "GreetKitTests",
+            dependencies: ["GreetKit"]),
     ])

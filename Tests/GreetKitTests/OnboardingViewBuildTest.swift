@@ -1,7 +1,7 @@
 #if os(iOS) || os(macOS)
 import SwiftUI
 import Testing
-@testable import OnboardingKit
+@testable import GreetKit
 
 @MainActor
 struct OnboardingViewBuildTest {
