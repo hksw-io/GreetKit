@@ -114,6 +114,11 @@ struct OnboardingViewBuildTest {
     }
 
     @Test
+    func viewConstructsWithBrandSoftGradientBackground() {
+        _ = self.backgroundView(.softGradient(brand: .orange))
+    }
+
+    @Test
     func viewConstructsWithLinearGradientBackground() {
         _ = self.backgroundView(.linearGradient(
             colors: [.blue.opacity(0.18), .mint.opacity(0.12), .clear],
@@ -122,8 +127,30 @@ struct OnboardingViewBuildTest {
     }
 
     @Test
-    func viewConstructsWithAnimatedMeshBackground() {
-        _ = self.backgroundView(.animatedMesh())
+    func viewConstructsWithAnimatedGradientBackground() {
+        _ = self.backgroundView(.animatedGradient())
+    }
+
+    @Test
+    func viewConstructsWithExpressiveAnimatedGradientBackground() {
+        _ = self.backgroundView(.animatedGradient(motion: .expressive))
+    }
+
+    @Test
+    func viewConstructsWithGradientPaletteOverride() {
+        let palette = OnboardingGradientPalette(
+            light: .init(
+                base: .white,
+                primary: .pink,
+                secondary: .orange,
+                accent: .yellow),
+            dark: .init(
+                base: .black,
+                primary: .purple,
+                secondary: .blue,
+                accent: .mint))
+
+        _ = self.backgroundView(.animatedGradient(palette: palette))
     }
 
     @Test
@@ -132,11 +159,25 @@ struct OnboardingViewBuildTest {
             LinearGradient(
                 colors: [
                     Color.blue.opacity(context.reduceMotion ? 0.10 : 0.18),
-                    Color.purple.opacity(0.12),
+                    context.colorScheme == .dark ? .purple.opacity(0.24) : .purple.opacity(0.12),
                 ],
                 startPoint: .top,
                 endPoint: .bottom)
         })
+    }
+
+    @Test
+    func backgroundContextStoresColorScheme() {
+        let defaultContext = OnboardingBackgroundContext(reduceMotion: true)
+        let darkContext = OnboardingBackgroundContext(
+            reduceMotion: false,
+            brandColor: .pink,
+            colorScheme: .dark)
+
+        #expect(defaultContext.reduceMotion)
+        #expect(defaultContext.colorScheme == .light)
+        #expect(!darkContext.reduceMotion)
+        #expect(darkContext.colorScheme == .dark)
     }
 
     @Test
@@ -232,7 +273,7 @@ struct OnboardingViewBuildTest {
             primaryRouteDestination: { route in
                 Text(route.id)
             })
-            .onboardingBackground(.animatedMesh())
+            .onboardingBackground(.animatedGradient())
     }
 
     @Test
@@ -261,8 +302,14 @@ struct OnboardingViewBuildTest {
 
     @Test
     func animatedGradientCentersAreStableWithReduceMotion() {
-        let first = OnboardingAnimatedGradientMotion.centers(phase: 0, reduceMotion: true)
-        let second = OnboardingAnimatedGradientMotion.centers(phase: 0.5, reduceMotion: true)
+        let first = OnboardingAnimatedGradientMotion.centers(
+            phase: 0,
+            reduceMotion: true,
+            motion: .expressive)
+        let second = OnboardingAnimatedGradientMotion.centers(
+            phase: 0.5,
+            reduceMotion: true,
+            motion: .expressive)
 
         #expect(first[0].x == second[0].x)
         #expect(first[0].y == second[0].y)
@@ -274,6 +321,35 @@ struct OnboardingViewBuildTest {
         let second = OnboardingAnimatedGradientMotion.centers(phase: 0.25, reduceMotion: false)
 
         #expect(abs(first[0].x - second[0].x) > 0.0001)
+    }
+
+    @Test
+    func expressiveAnimatedGradientMotionTravelsFartherThanSubtleMotion() {
+        let subtleStart = OnboardingAnimatedGradientMotion.centers(
+            phase: 0,
+            reduceMotion: false,
+            motion: .subtle)
+        let subtleEnd = OnboardingAnimatedGradientMotion.centers(
+            phase: 0.25,
+            reduceMotion: false,
+            motion: .subtle)
+        let expressiveStart = OnboardingAnimatedGradientMotion.centers(
+            phase: 0,
+            reduceMotion: false,
+            motion: .expressive)
+        let expressiveEnd = OnboardingAnimatedGradientMotion.centers(
+            phase: 0.25,
+            reduceMotion: false,
+            motion: .expressive)
+
+        #expect(self.totalTravel(from: expressiveStart, to: expressiveEnd) > self.totalTravel(from: subtleStart, to: subtleEnd))
+    }
+
+    @Test
+    func expressiveAnimatedGradientMotionHasHigherVisualContrastThanSubtleMotion() {
+        #expect(OnboardingGradientMotion.expressive.baseTintScale > OnboardingGradientMotion.subtle.baseTintScale)
+        #expect(OnboardingGradientMotion.expressive.blobOpacityScale > OnboardingGradientMotion.subtle.blobOpacityScale)
+        #expect(OnboardingGradientMotion.expressive.blobBlurScale < OnboardingGradientMotion.subtle.blobBlurScale)
     }
 
     @Test
@@ -540,6 +616,14 @@ struct OnboardingViewBuildTest {
             errorMessage: .constant(nil),
             onPrimary: {},
             onSkip: {})
+    }
+
+    private func totalTravel(from first: [CGPoint], to second: [CGPoint]) -> Double {
+        zip(first, second).reduce(0) { total, pair in
+            let xDistance = Double(pair.0.x - pair.1.x)
+            let yDistance = Double(pair.0.y - pair.1.y)
+            return total + ((xDistance * xDistance) + (yDistance * yDistance)).squareRoot()
+        }
     }
 }
 

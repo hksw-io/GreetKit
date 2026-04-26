@@ -15,6 +15,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
     let onPrimaryRoutesComplete: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
     @State private var featuresVisible = false
     @State private var scrollEdgeFadeOpacity: Double = 1
     @State private var activePrimaryDestination = false
@@ -129,7 +130,9 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         ZStack {
             OnboardingBackgroundView(
                 background: self.background,
-                reduceMotion: self.reduceMotion)
+                reduceMotion: self.reduceMotion,
+                brandColor: self.style.tint,
+                colorScheme: self.colorScheme)
 
             ZStack {
                 if let activePrimaryRoute = self.activePrimaryRoute,
@@ -162,6 +165,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             .animation(self.routeAnimation, value: self.primaryRoutePhaseID)
         }
         .clipped()
+        .scrollIndicators(.hidden)
     }
 
     private var onboardingOverview: some View {
@@ -513,10 +517,15 @@ private enum OnboardingRouteTransitionDirection {
 private struct OnboardingBackgroundView: View {
     let background: OnboardingBackground
     let reduceMotion: Bool
+    let brandColor: Color?
+    let colorScheme: ColorScheme
 
     var body: some View {
         self.background
-            .makeView(context: OnboardingBackgroundContext(reduceMotion: self.reduceMotion))
+            .makeView(context: OnboardingBackgroundContext(
+                reduceMotion: self.reduceMotion,
+                brandColor: self.brandColor,
+                colorScheme: self.colorScheme))
             .ignoresSafeArea()
     }
 }
@@ -910,7 +919,7 @@ private struct LongOnboardingPreviewContent: OnboardingContent {
         primaryRouteDestination: { route in
             OnboardingPrimaryRoutePreviewDestination(route: route)
         })
-        .onboardingBackground(.animatedMesh())
+        .onboardingBackground(.animatedGradient())
         .frame(width: 390, height: 740)
 }
 

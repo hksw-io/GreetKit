@@ -105,20 +105,61 @@ OnboardingView(
     errorMessage: $errorMessage,
     onPrimary: {},
     onSkip: {})
-    .onboardingBackground(.softGradient)
+    .onboardingBackground(.animatedGradient())
+    .onboardingStyle(OnboardingStyle(tint: .indigo))
 ```
 
 Built-in options:
 
 - `.system` — the default platform background.
-- `.softGradient` — a restrained blue/mint background tuned for readable onboarding content.
+- `.softGradient` — a restrained brand-derived background tuned for readable onboarding content.
 - `.linearGradient(colors:startPoint:endPoint:)` — app-provided colors with the library-managed footer treatment.
-- `.animatedMesh(primary:secondary:accent:)` — an opt-in smooth full-surface animated gradient. It keeps a tinted base across the whole sheet and automatically becomes static when Reduce Motion is enabled.
-- `.custom { context in ... }` — a fully custom SwiftUI background. Use `context.reduceMotion` to keep custom animations accessible.
+- `.animatedGradient(brand:palette:motion:)` — an opt-in smooth full-surface animated gradient. It uses the style tint by default, adapts its tones for light and dark mode, and automatically becomes static when Reduce Motion is enabled.
+- `.custom { context in ... }` — a fully custom SwiftUI background. Use `context.reduceMotion`, `context.brandColor`, and `context.colorScheme` to keep custom backgrounds consistent and accessible.
 
 Destination views can still draw their own backgrounds. If they do, that local destination background appears above the onboarding background.
 
 Every background spans behind the pinned footer and button area, including `.system`.
+
+`Style.tint` is the default brand color for `.softGradient` and `.animatedGradient()`. Pass `brand:` when the background should use a different brand color from the controls, or pass a full palette when an app needs exact light and dark tones:
+
+```swift
+let palette = OnboardingGradientPalette(
+    light: .init(
+        base: .white,
+        primary: .pink,
+        secondary: .orange,
+        accent: .yellow),
+    dark: .init(
+        base: .black,
+        primary: .pink,
+        secondary: .purple,
+        accent: .cyan))
+
+OnboardingView(
+    content: MyOnboarding(),
+    isLoading: $isLoading,
+    errorMessage: $errorMessage,
+    onPrimary: {},
+    onSkip: {})
+    .onboardingBackground(.animatedGradient(palette: palette))
+```
+
+Use `motion:` when the default dancing gradient should be calmer or more expressive:
+
+```swift
+OnboardingView(
+    content: MyOnboarding(),
+    isLoading: $isLoading,
+    errorMessage: $errorMessage,
+    onPrimary: {},
+    onSkip: {})
+    .onboardingBackground(.animatedGradient(motion: .expressive))
+```
+
+The built-in presets are `.subtle`, `.standard`, and `.expressive`. Stronger motion increases movement, speed, and gradient contrast. For finer control, pass `OnboardingGradientMotion(strength:)`.
+
+`.animatedMesh(primary:secondary:accent:)` remains available as a deprecated compatibility alias for `.animatedGradient(palette:motion:)`.
 
 ## Styling
 
