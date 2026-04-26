@@ -1,7 +1,7 @@
 #if os(iOS) || os(macOS)
 import SwiftUI
 
-public struct OnboardingStyle {
+public struct GreetStyle {
     public var tint: Color?
     public var titleColor: Color?
     public var subtitleColor: Color?
@@ -39,7 +39,7 @@ public struct OnboardingStyle {
     }
 }
 
-extension OnboardingStyle {
+extension GreetStyle {
     var subtitleForegroundStyle: AnyShapeStyle {
         Self.foregroundStyle(for: self.subtitleColor, fallback: AnyShapeStyle(.secondary))
     }

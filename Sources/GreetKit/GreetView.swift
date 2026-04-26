@@ -1,17 +1,17 @@
 #if os(iOS) || os(macOS)
 import SwiftUI
 
-public struct OnboardingView<Content: OnboardingContent>: View {
+public struct GreetView<Content: GreetContent>: View {
     let content: Content
     @Binding var isLoading: Bool
     @Binding var errorMessage: String?
     let allowsInteractiveDismissal: Bool
-    private var background: OnboardingBackground = .system
-    private var style: OnboardingStyle = .standard
+    private var background: GreetBackground = .system
+    private var style: GreetStyle = .standard
     let onPrimary: () -> Void
     let onSkip: () -> Void
     let primaryDestination: (() -> AnyView)?
-    let primaryRouteDestination: ((OnboardingPrimaryRoute) -> AnyView)?
+    let primaryRouteDestination: ((GreetPrimaryRoute) -> AnyView)?
     let onPrimaryRoutesComplete: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -19,8 +19,8 @@ public struct OnboardingView<Content: OnboardingContent>: View {
     @State private var featuresVisible = false
     @State private var scrollEdgeFadeOpacity: Double = 1
     @State private var activePrimaryDestination = false
-    @State private var activePrimaryRouteID: OnboardingPrimaryRoute.ID?
-    @State private var routeTransitionDirection: OnboardingRouteTransitionDirection = .forward
+    @State private var activePrimaryRouteID: GreetPrimaryRoute.ID?
+    @State private var routeTransitionDirection: GreetRouteTransitionDirection = .forward
     @State private var footerFrame: FooterMaskFrame = .zero
 
     @ScaledMetric(relativeTo: .largeTitle) private var iconSize: CGFloat = Tokens.Platform.iconSize
@@ -80,7 +80,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         onPrimary: @escaping () -> Void,
         onSkip: @escaping () -> Void,
         onPrimaryRoutesComplete: @escaping () -> Void = {},
-        @ViewBuilder primaryRouteDestination: @escaping (OnboardingPrimaryRoute) -> PrimaryRouteDestination)
+        @ViewBuilder primaryRouteDestination: @escaping (GreetPrimaryRoute) -> PrimaryRouteDestination)
     {
         self.content = content
         self._isLoading = isLoading
@@ -94,8 +94,8 @@ public struct OnboardingView<Content: OnboardingContent>: View {
     }
 
     public var body: some View {
-        self.onboardingContent
-            .onboardingTint(self.style.tint)
+        self.greetContent
+            .greetTint(self.style.tint)
             .alert(
                 self.content.errorAlertTitle,
                 isPresented: self.errorPresented,
@@ -114,21 +114,21 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             .interactiveDismissDisabled(!self.allowsInteractiveDismissal)
     }
 
-    public func onboardingBackground(_ background: OnboardingBackground) -> Self {
+    public func greetBackground(_ background: GreetBackground) -> Self {
         var view = self
         view.background = background
         return view
     }
 
-    public func onboardingStyle(_ style: OnboardingStyle) -> Self {
+    public func greetStyle(_ style: GreetStyle) -> Self {
         var view = self
         view.style = style
         return view
     }
 
-    private var onboardingContent: some View {
+    private var greetContent: some View {
         ZStack {
-            OnboardingBackgroundView(
+            GreetBackgroundView(
                 background: self.background,
                 reduceMotion: self.reduceMotion,
                 brandColor: self.style.tint,
@@ -138,7 +138,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                 if let activePrimaryRoute = self.activePrimaryRoute,
                    let primaryRouteDestination = self.primaryRouteDestination
                 {
-                    OnboardingPrimaryRouteDestinationContainer(
+                    GreetPrimaryRouteDestinationContainer(
                         content: self.content,
                         background: self.background,
                         style: self.style,
@@ -152,12 +152,12 @@ public struct OnboardingView<Content: OnboardingContent>: View {
                         .id("primary-route-\(activePrimaryRoute.route.id)")
                         .transition(self.routeTransition)
                 } else if self.activePrimaryDestination, let primaryDestination = self.primaryDestination {
-                    OnboardingPrimaryDestinationContainer(
+                    GreetPrimaryDestinationContainer(
                         destination: primaryDestination())
                         .id("primary-destination")
                         .transition(self.routeTransition)
                 } else {
-                    self.onboardingOverview
+                    self.greetOverview
                         .id("overview")
                         .transition(self.routeTransition)
                 }
@@ -168,15 +168,15 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         .scrollIndicators(.never, axes: .vertical)
     }
 
-    private var onboardingOverview: some View {
+    private var greetOverview: some View {
         GeometryReader { geometry in
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: self.contentSpacing) {
-                    OnboardingHeaderSection(
+                    GreetHeaderSection(
                         content: self.content,
                         iconSize: self.iconSize,
                         style: self.style)
-                    OnboardingFeatureList(
+                    GreetFeatureList(
                         features: self.content.features,
                         featureSpacing: self.featureSpacing,
                         featureIconSize: self.featureIconSize,
@@ -215,7 +215,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
             }
             .overlay(alignment: .bottom) {
                 ZStack {
-                    OnboardingFooterSection(
+                    GreetFooterSection(
                         content: self.content,
                         isLoading: self.isLoading,
                         style: self.style,
@@ -288,7 +288,7 @@ public struct OnboardingView<Content: OnboardingContent>: View {
         }
     }
 
-    private var activePrimaryRoute: (index: Int, route: OnboardingPrimaryRoute)? {
+    private var activePrimaryRoute: (index: Int, route: GreetPrimaryRoute)? {
         guard let activePrimaryRouteID else {
             return nil
         }
@@ -388,7 +388,7 @@ enum ScrollEdgeFade {
 }
 
 enum FooterMaskMetrics {
-    static let coordinateSpaceName = "OnboardingFooterMask"
+    static let coordinateSpaceName = "GreetFooterMask"
     static let heightStep: CGFloat = 1
     static let maximumFadeHeight: CGFloat = 28
 
@@ -509,20 +509,20 @@ private struct FooterContentMask: View {
     }
 }
 
-private enum OnboardingRouteTransitionDirection {
+private enum GreetRouteTransitionDirection {
     case forward
     case backward
 }
 
-private struct OnboardingBackgroundView: View {
-    let background: OnboardingBackground
+private struct GreetBackgroundView: View {
+    let background: GreetBackground
     let reduceMotion: Bool
     let brandColor: Color?
     let colorScheme: ColorScheme
 
     var body: some View {
         self.background
-            .makeView(context: OnboardingBackgroundContext(
+            .makeView(context: GreetBackgroundContext(
                 reduceMotion: self.reduceMotion,
                 brandColor: self.brandColor,
                 colorScheme: self.colorScheme))
@@ -530,7 +530,7 @@ private struct OnboardingBackgroundView: View {
     }
 }
 
-private struct OnboardingPrimaryDestinationContainer<Destination: View>: View {
+private struct GreetPrimaryDestinationContainer<Destination: View>: View {
     let destination: Destination
 
     var body: some View {
@@ -544,10 +544,10 @@ private struct OnboardingPrimaryDestinationContainer<Destination: View>: View {
     }
 }
 
-private struct OnboardingPrimaryRouteDestinationContainer<Content: OnboardingContent, Destination: View>: View {
+private struct GreetPrimaryRouteDestinationContainer<Content: GreetContent, Destination: View>: View {
     let content: Content
-    let background: OnboardingBackground
-    let style: OnboardingStyle
+    let background: GreetBackground
+    let style: GreetStyle
     let destination: Destination
     let index: Int
     let count: Int
@@ -612,10 +612,10 @@ private struct OnboardingPrimaryRouteDestinationContainer<Content: OnboardingCon
     }
 }
 
-private struct OnboardingHeaderSection<Content: OnboardingContent>: View {
+private struct GreetHeaderSection<Content: GreetContent>: View {
     let content: Content
     let iconSize: CGFloat
-    let style: OnboardingStyle
+    let style: GreetStyle
 
     var body: some View {
         VStack(spacing: Tokens.Spacing.large) {
@@ -637,7 +637,7 @@ private struct OnboardingHeaderSection<Content: OnboardingContent>: View {
                 .font(.largeTitle)
             #endif
                 .fontWeight(.bold)
-                .onboardingOptionalForegroundStyle(self.style.titleColor)
+                .greetOptionalForegroundStyle(self.style.titleColor)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
@@ -653,18 +653,18 @@ private struct OnboardingHeaderSection<Content: OnboardingContent>: View {
     }
 }
 
-private struct OnboardingFeatureList: View {
-    let features: [OnboardingFeatureItem]
+private struct GreetFeatureList: View {
+    let features: [GreetFeatureItem]
     let featureSpacing: CGFloat
     let featureIconSize: CGFloat
     let featuresVisible: Bool
     let reduceMotion: Bool
-    let style: OnboardingStyle
+    let style: GreetStyle
 
     var body: some View {
         VStack(spacing: self.featureSpacing) {
             ForEach(Array(self.features.enumerated()), id: \.element.id) { index, feature in
-                OnboardingFeatureRow(
+                GreetFeatureRow(
                     feature: feature,
                     index: index,
                     featureIconSize: self.featureIconSize,
@@ -676,13 +676,13 @@ private struct OnboardingFeatureList: View {
     }
 }
 
-private struct OnboardingFeatureRow: View {
-    let feature: OnboardingFeatureItem
+private struct GreetFeatureRow: View {
+    let feature: GreetFeatureItem
     let index: Int
     let featureIconSize: CGFloat
     let featuresVisible: Bool
     let reduceMotion: Bool
-    let style: OnboardingStyle
+    let style: GreetStyle
 
     var body: some View {
         let delay = Tokens.Motion.revealDelay(for: self.index)
@@ -703,7 +703,7 @@ private struct OnboardingFeatureRow: View {
                 if let label = self.feature.label {
                     label
                         .font(.headline)
-                        .onboardingOptionalForegroundStyle(self.style.featureTitleColor)
+                        .greetOptionalForegroundStyle(self.style.featureTitleColor)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 self.feature.description
@@ -726,10 +726,10 @@ private struct OnboardingFeatureRow: View {
     }
 }
 
-private struct OnboardingFooterSection<Content: OnboardingContent>: View {
+private struct GreetFooterSection<Content: GreetContent>: View {
     let content: Content
     let isLoading: Bool
-    let style: OnboardingStyle
+    let style: GreetStyle
     let onPrimary: () -> Void
     let onSkip: () -> Void
 
@@ -801,7 +801,7 @@ private struct OnboardingFooterSection<Content: OnboardingContent>: View {
 
 private extension View {
     @ViewBuilder
-    func onboardingTint(_ color: Color?) -> some View {
+    func greetTint(_ color: Color?) -> some View {
         if let color {
             self.tint(color)
         } else {
@@ -810,7 +810,7 @@ private extension View {
     }
 
     @ViewBuilder
-    func onboardingOptionalForegroundStyle(_ color: Color?) -> some View {
+    func greetOptionalForegroundStyle(_ color: Color?) -> some View {
         if let color {
             self.foregroundStyle(color)
         } else {
@@ -819,34 +819,34 @@ private extension View {
     }
 }
 
-private struct OnboardingPreviewContent: OnboardingContent {
+private struct GreetPreviewContent: GreetContent {
     var appIcon: Image? { Image(systemName: "app.gift.fill") }
     var title: Text { Text("Welcome") }
     var subtitle: Text? { Text("Here's what makes this app great.") }
-    var features: [OnboardingFeatureItem] {
+    var features: [GreetFeatureItem] {
         [
-            OnboardingFeatureItem(
+            GreetFeatureItem(
                 id: "tap-to-flip",
                 systemImage: "hand.tap.fill",
                 label: "Tap to flip",
                 description: "Review cards with a simple tap."),
-            OnboardingFeatureItem(
+            GreetFeatureItem(
                 id: "organize",
                 systemImage: "folder.fill",
                 label: "Organize",
                 description: "Group cards into decks and folders."),
-            OnboardingFeatureItem(
+            GreetFeatureItem(
                 id: "spaced-repetition",
                 systemImage: "brain.head.profile.fill",
                 label: "Spaced repetition",
                 description: "Study smarter, not harder."),
         ]
     }
-    var primaryRoutes: [OnboardingPrimaryRoute] {
+    var primaryRoutes: [GreetPrimaryRoute] {
         [
-            OnboardingPrimaryRoute(id: "permissions"),
-            OnboardingPrimaryRoute(id: "sample-data"),
-            OnboardingPrimaryRoute(id: "notifications"),
+            GreetPrimaryRoute(id: "permissions"),
+            GreetPrimaryRoute(id: "sample-data"),
+            GreetPrimaryRoute(id: "notifications"),
         ]
     }
     var primaryButtonText: Text { Text("Get started") }
@@ -856,39 +856,39 @@ private struct OnboardingPreviewContent: OnboardingContent {
     var errorOKText: Text { Text("OK") }
 }
 
-private struct LongOnboardingPreviewContent: OnboardingContent {
+private struct LongGreetPreviewContent: GreetContent {
     var appIcon: Image? { Image(systemName: "rectangle.stack.badge.plus.fill") }
     var title: Text {
-        Text("A much longer onboarding title that must wrap cleanly")
+        Text("A much longer greet title that must wrap cleanly")
     }
     var subtitle: Text? {
         Text("This subtitle is intentionally longer so narrow presentations and larger Dynamic Type sizes still have room to breathe.")
     }
-    var features: [OnboardingFeatureItem] {
+    var features: [GreetFeatureItem] {
         (1...12).map { index in
-            OnboardingFeatureItem(
+            GreetFeatureItem(
                 id: "long-feature-\(index)",
                 systemImage: "checkmark.circle.fill",
-                label: "Onboarding feature \(index) with a longer localized label",
-                description: "This onboarding description is long enough to wrap over multiple lines while keeping the icon, text, and action area stable.")
+                label: "Greet feature \(index) with a longer localized label",
+                description: "This greet description is long enough to wrap over multiple lines while keeping the icon, text, and action area stable.")
         }
     }
     var primaryButtonText: Text {
         Text("Get started with all sample data and preferences")
     }
     var skipButtonText: Text? {
-        Text("Skip this longer onboarding flow for now")
+        Text("Skip this longer greet flow for now")
     }
     var errorAlertTitle: Text { Text("Something went wrong") }
     var errorOKText: Text { Text("OK") }
 }
 
-#Preview("Onboarding") {
+#Preview("Greet") {
     @Previewable @State var isLoading = false
     @Previewable @State var errorMessage: String?
 
-    OnboardingView(
-        content: OnboardingPreviewContent(),
+    GreetView(
+        content: GreetPreviewContent(),
         isLoading: $isLoading,
         errorMessage: $errorMessage,
         onPrimary: {},
@@ -897,81 +897,81 @@ private struct LongOnboardingPreviewContent: OnboardingContent {
             isLoading = false
         },
         primaryRouteDestination: { route in
-            OnboardingPrimaryRoutePreviewDestination(route: route)
+            GreetPrimaryRoutePreviewDestination(route: route)
         })
 }
 
-#Preview("Onboarding Soft Gradient") {
-    OnboardingView(
-        content: OnboardingPreviewContent(),
+#Preview("Greet Soft Gradient") {
+    GreetView(
+        content: GreetPreviewContent(),
         isLoading: .constant(false),
         errorMessage: .constant(nil),
         onPrimary: {},
         onSkip: {},
         primaryRouteDestination: { route in
-            OnboardingPrimaryRoutePreviewDestination(route: route)
+            GreetPrimaryRoutePreviewDestination(route: route)
         })
-        .onboardingBackground(.softGradient)
+        .greetBackground(.softGradient)
         .frame(width: 390, height: 740)
 }
 
-#Preview("Onboarding Animated Background") {
-    OnboardingView(
-        content: OnboardingPreviewContent(),
+#Preview("Greet Animated Background") {
+    GreetView(
+        content: GreetPreviewContent(),
         isLoading: .constant(false),
         errorMessage: .constant(nil),
         onPrimary: {},
         onSkip: {},
         primaryRouteDestination: { route in
-            OnboardingPrimaryRoutePreviewDestination(route: route)
+            GreetPrimaryRoutePreviewDestination(route: route)
         })
-        .onboardingBackground(.animatedGradient())
+        .greetBackground(.animatedGradient())
         .frame(width: 390, height: 740)
 }
 
-#Preview("Onboarding Long Narrow") {
-    OnboardingView(
-        content: LongOnboardingPreviewContent(),
+#Preview("Greet Long Narrow") {
+    GreetView(
+        content: LongGreetPreviewContent(),
         isLoading: .constant(false),
         errorMessage: .constant(nil),
         onPrimary: {},
         onSkip: {},
         primaryRouteDestination: { route in
-            OnboardingPrimaryRoutePreviewDestination(route: route)
+            GreetPrimaryRoutePreviewDestination(route: route)
         })
         .frame(width: 320, height: 760)
 }
 
-#Preview("Onboarding Loading") {
-    OnboardingView(
-        content: OnboardingPreviewContent(),
+#Preview("Greet Loading") {
+    GreetView(
+        content: GreetPreviewContent(),
         isLoading: .constant(true),
         errorMessage: .constant(nil),
         onPrimary: {},
         onSkip: {},
         primaryRouteDestination: { route in
-            OnboardingPrimaryRoutePreviewDestination(route: route)
+            GreetPrimaryRoutePreviewDestination(route: route)
         })
         .frame(width: 390, height: 740)
 }
 
-#Preview("Onboarding Dark Accessibility") {
-    OnboardingView(
-        content: LongOnboardingPreviewContent(),
+#Preview("Greet Dark Accessibility") {
+    GreetView(
+        content: LongGreetPreviewContent(),
         isLoading: .constant(false),
         errorMessage: .constant(nil),
         onPrimary: {},
         onSkip: {},
         primaryRouteDestination: { route in
-            OnboardingPrimaryRoutePreviewDestination(route: route)
+            GreetPrimaryRoutePreviewDestination(route: route)
         })
         .frame(width: 390, height: 780)
         .preferredColorScheme(.dark)
         .dynamicTypeSize(.accessibility2)
 }
 
-private struct OnboardingPrimaryRoutePreviewDestination: View {
-    let route: OnboardingPrimaryRoute
+private struct GreetPrimaryRoutePreviewDestination: View {
+    let route: GreetPrimaryRoute
 
     var body: some View {
         VStack(spacing: Tokens.Spacing.large) {
@@ -1017,7 +1017,7 @@ private struct OnboardingPrimaryRoutePreviewDestination: View {
         case "sample-data":
             Text("Prepare starter content so users can try the app immediately.")
         case "notifications":
-            Text("Offer a final setup step before completing onboarding.")
+            Text("Offer a final setup step before completing greet.")
         default:
             Text("The primary button can slide through chained follow-up routes inside the same sheet.")
         }

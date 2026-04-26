@@ -2,7 +2,7 @@
 import Foundation
 import SwiftUI
 
-public struct OnboardingBackgroundContext {
+public struct GreetBackgroundContext {
     public let reduceMotion: Bool
     public let brandColor: Color?
     public let colorScheme: ColorScheme
@@ -18,7 +18,7 @@ public struct OnboardingBackgroundContext {
     }
 }
 
-public struct OnboardingGradientPalette {
+public struct GreetGradientPalette {
     public struct Tones {
         public var base: Color
         public var primary: Color
@@ -64,7 +64,7 @@ public struct OnboardingGradientPalette {
     }
 }
 
-public struct OnboardingGradientMotion: Equatable, Sendable {
+public struct GreetGradientMotion: Equatable, Sendable {
     public var strength: Double
 
     public static let subtle = Self(strength: 0.7)
@@ -100,13 +100,13 @@ public struct OnboardingGradientMotion: Equatable, Sendable {
     }
 }
 
-public struct OnboardingBackground {
+public struct GreetBackground {
     enum Storage {
         case system
-        case softGradient(brand: Color?, palette: OnboardingGradientPalette?)
+        case softGradient(brand: Color?, palette: GreetGradientPalette?)
         case linearGradient(colors: [Color], startPoint: UnitPoint, endPoint: UnitPoint)
-        case animatedGradient(brand: Color?, palette: OnboardingGradientPalette?, motion: OnboardingGradientMotion)
-        case custom((OnboardingBackgroundContext) -> AnyView)
+        case animatedGradient(brand: Color?, palette: GreetGradientPalette?, motion: GreetGradientMotion)
+        case custom((GreetBackgroundContext) -> AnyView)
     }
 
     let storage: Storage
@@ -116,7 +116,7 @@ public struct OnboardingBackground {
 
     public static func softGradient(
         brand: Color? = nil,
-        palette: OnboardingGradientPalette? = nil) -> Self
+        palette: GreetGradientPalette? = nil) -> Self
     {
         Self(storage: .softGradient(brand: brand, palette: palette))
     }
@@ -131,8 +131,8 @@ public struct OnboardingBackground {
 
     public static func animatedGradient(
         brand: Color? = nil,
-        palette: OnboardingGradientPalette? = nil,
-        motion: OnboardingGradientMotion = .standard) -> Self
+        palette: GreetGradientPalette? = nil,
+        motion: GreetGradientMotion = .standard) -> Self
     {
         Self(storage: .animatedGradient(brand: brand, palette: palette, motion: motion))
     }
@@ -144,7 +144,7 @@ public struct OnboardingBackground {
         accent: Color = .mint) -> Self
     {
         self.animatedGradient(
-            palette: OnboardingGradientPalette(
+            palette: GreetGradientPalette(
                 light: .init(
                     base: Tokens.background,
                     primary: primary,
@@ -154,7 +154,7 @@ public struct OnboardingBackground {
     }
 
     public static func custom<Background: View>(
-        @ViewBuilder _ background: @escaping (OnboardingBackgroundContext) -> Background) -> Self
+        @ViewBuilder _ background: @escaping (GreetBackgroundContext) -> Background) -> Self
     {
         Self(storage: .custom { context in
             AnyView(background(context))
@@ -162,27 +162,27 @@ public struct OnboardingBackground {
     }
 }
 
-extension OnboardingBackground {
+extension GreetBackground {
     @MainActor
-    func makeView(context: OnboardingBackgroundContext) -> AnyView {
+    func makeView(context: GreetBackgroundContext) -> AnyView {
         switch self.storage {
         case .system:
             AnyView(Tokens.background)
         case let .softGradient(brand, palette):
-            AnyView(OnboardingSoftGradientBackground(
-                tones: OnboardingGradientPaletteResolver.tones(
+            AnyView(GreetSoftGradientBackground(
+                tones: GreetGradientPaletteResolver.tones(
                     brand: brand,
                     palette: palette,
                     context: context),
                 colorScheme: context.colorScheme))
         case let .linearGradient(colors, startPoint, endPoint):
-            AnyView(OnboardingLinearGradientBackground(
+            AnyView(GreetLinearGradientBackground(
                 colors: colors,
                 startPoint: startPoint,
                 endPoint: endPoint))
         case let .animatedGradient(brand, palette, motion):
-            AnyView(OnboardingAnimatedGradientBackground(
-                tones: OnboardingGradientPaletteResolver.tones(
+            AnyView(GreetAnimatedGradientBackground(
+                tones: GreetGradientPaletteResolver.tones(
                     brand: brand,
                     palette: palette,
                     context: context),
@@ -195,12 +195,12 @@ extension OnboardingBackground {
     }
 }
 
-private struct OnboardingSoftGradientBackground: View {
-    let tones: OnboardingGradientPalette.Tones
+private struct GreetSoftGradientBackground: View {
+    let tones: GreetGradientPalette.Tones
     let colorScheme: ColorScheme
 
     var body: some View {
-        let tuning = OnboardingGradientVisualTuning.soft(colorScheme: self.colorScheme)
+        let tuning = GreetGradientVisualTuning.soft(colorScheme: self.colorScheme)
 
         ZStack {
             self.tones.base
@@ -235,7 +235,7 @@ private struct OnboardingSoftGradientBackground: View {
     }
 }
 
-private struct OnboardingLinearGradientBackground: View {
+private struct GreetLinearGradientBackground: View {
     let colors: [Color]
     let startPoint: UnitPoint
     let endPoint: UnitPoint
@@ -248,10 +248,10 @@ private struct OnboardingLinearGradientBackground: View {
     }
 }
 
-private struct OnboardingAnimatedGradientBackground: View {
-    let tones: OnboardingGradientPalette.Tones
+private struct GreetAnimatedGradientBackground: View {
+    let tones: GreetGradientPalette.Tones
     let colorScheme: ColorScheme
-    let motion: OnboardingGradientMotion
+    let motion: GreetGradientMotion
     let reduceMotion: Bool
 
     private static let baseCycleDuration: TimeInterval = 10
@@ -265,11 +265,11 @@ private struct OnboardingAnimatedGradientBackground: View {
                 : timeline.date.timeIntervalSinceReferenceDate / (Self.baseCycleDuration / self.motion.speedScale)
 
             GeometryReader { geometry in
-                let centers = OnboardingAnimatedGradientMotion.centers(
+                let centers = GreetAnimatedGradientMotion.centers(
                     phase: phase,
                     reduceMotion: self.reduceMotion,
                     motion: self.motion)
-                let tuning = OnboardingGradientVisualTuning
+                let tuning = GreetGradientVisualTuning
                     .animated(colorScheme: self.colorScheme)
                     .scaled(for: self.motion)
 
@@ -278,7 +278,7 @@ private struct OnboardingAnimatedGradientBackground: View {
                     colorMode: .extendedLinear,
                     rendersAsynchronously: true)
                 { context, size in
-                    OnboardingAnimatedGradientRenderer.draw(
+                    GreetAnimatedGradientRenderer.draw(
                         context: &context,
                         size: size,
                         tones: self.tones,
@@ -291,12 +291,12 @@ private struct OnboardingAnimatedGradientBackground: View {
     }
 }
 
-private enum OnboardingAnimatedGradientRenderer {
+private enum GreetAnimatedGradientRenderer {
     static func draw(
         context: inout GraphicsContext,
         size: CGSize,
-        tones: OnboardingGradientPalette.Tones,
-        tuning: OnboardingAnimatedGradientTuning,
+        tones: GreetGradientPalette.Tones,
+        tuning: GreetAnimatedGradientTuning,
         centers: [CGPoint])
     {
         let rect = CGRect(origin: .zero, size: size)
@@ -390,18 +390,18 @@ private enum OnboardingAnimatedGradientRenderer {
     }
 }
 
-private enum OnboardingGradientPaletteResolver {
+private enum GreetGradientPaletteResolver {
     static func tones(
         brand: Color?,
-        palette: OnboardingGradientPalette?,
-        context: OnboardingBackgroundContext) -> OnboardingGradientPalette.Tones
+        palette: GreetGradientPalette?,
+        context: GreetBackgroundContext) -> GreetGradientPalette.Tones
     {
         let resolvedPalette = palette ?? .brand(brand ?? context.brandColor ?? .blue)
         return resolvedPalette.tones(for: context.colorScheme)
     }
 }
 
-private struct OnboardingSoftGradientTuning {
+private struct GreetSoftGradientTuning {
     let baseTintOpacity: Double
     let primaryOpacity: Double
     let secondaryOpacity: Double
@@ -411,7 +411,7 @@ private struct OnboardingSoftGradientTuning {
     let bottomVeilOpacity: Double
 }
 
-private struct OnboardingAnimatedGradientTuning {
+private struct GreetAnimatedGradientTuning {
     let baseTintOpacity: Double
     let primaryBlobOpacity: Double
     let secondaryBlobOpacity: Double
@@ -421,7 +421,7 @@ private struct OnboardingAnimatedGradientTuning {
     let bottomVeilOpacity: Double
     let blobBlurRatio: CGFloat
 
-    func scaled(for motion: OnboardingGradientMotion) -> Self {
+    func scaled(for motion: GreetGradientMotion) -> Self {
         Self(
             baseTintOpacity: min(0.72, self.baseTintOpacity * motion.baseTintScale),
             primaryBlobOpacity: min(0.78, self.primaryBlobOpacity * motion.blobOpacityScale),
@@ -434,10 +434,10 @@ private struct OnboardingAnimatedGradientTuning {
     }
 }
 
-private enum OnboardingGradientVisualTuning {
-    static func soft(colorScheme: ColorScheme) -> OnboardingSoftGradientTuning {
+private enum GreetGradientVisualTuning {
+    static func soft(colorScheme: ColorScheme) -> GreetSoftGradientTuning {
         if colorScheme == .dark {
-            return OnboardingSoftGradientTuning(
+            return GreetSoftGradientTuning(
                 baseTintOpacity: 0.20,
                 primaryOpacity: 0.24,
                 secondaryOpacity: 0.18,
@@ -447,7 +447,7 @@ private enum OnboardingGradientVisualTuning {
                 bottomVeilOpacity: 0.42)
         }
 
-        return OnboardingSoftGradientTuning(
+        return GreetSoftGradientTuning(
             baseTintOpacity: 0.12,
             primaryOpacity: 0.18,
             secondaryOpacity: 0.12,
@@ -457,9 +457,9 @@ private enum OnboardingGradientVisualTuning {
             bottomVeilOpacity: 0.78)
     }
 
-    static func animated(colorScheme: ColorScheme) -> OnboardingAnimatedGradientTuning {
+    static func animated(colorScheme: ColorScheme) -> GreetAnimatedGradientTuning {
         if colorScheme == .dark {
-            return OnboardingAnimatedGradientTuning(
+            return GreetAnimatedGradientTuning(
                 baseTintOpacity: 0.26,
                 primaryBlobOpacity: 0.46,
                 secondaryBlobOpacity: 0.40,
@@ -470,7 +470,7 @@ private enum OnboardingGradientVisualTuning {
                 blobBlurRatio: 0.028)
         }
 
-        return OnboardingAnimatedGradientTuning(
+        return GreetAnimatedGradientTuning(
             baseTintOpacity: 0.38,
             primaryBlobOpacity: 0.46,
             secondaryBlobOpacity: 0.42,
@@ -482,11 +482,11 @@ private enum OnboardingGradientVisualTuning {
     }
 }
 
-enum OnboardingAnimatedGradientMotion {
+enum GreetAnimatedGradientMotion {
     static func centers(
         phase: Double,
         reduceMotion: Bool,
-        motion: OnboardingGradientMotion = .standard) -> [CGPoint]
+        motion: GreetGradientMotion = .standard) -> [CGPoint]
     {
         let phase = reduceMotion ? 0 : phase
         let travelScale = reduceMotion ? 0 : motion.travelScale

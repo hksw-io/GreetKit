@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct OnboardingFeatureItem: Identifiable {
+public struct GreetFeatureItem: Identifiable {
     public let id: String
     public let image: Image?
     public let label: Text?
@@ -44,7 +44,7 @@ public struct OnboardingFeatureItem: Identifiable {
     }
 }
 
-public struct OnboardingPrimaryRoute: Identifiable, Hashable {
+public struct GreetPrimaryRoute: Identifiable, Hashable {
     public let id: String
 
     public init(id: String) {
@@ -52,12 +52,12 @@ public struct OnboardingPrimaryRoute: Identifiable, Hashable {
     }
 }
 
-public protocol OnboardingContent {
+public protocol GreetContent {
     var appIcon: Image? { get }
     var title: Text { get }
     var subtitle: Text? { get }
-    var features: [OnboardingFeatureItem] { get }
-    var primaryRoutes: [OnboardingPrimaryRoute] { get }
+    var features: [GreetFeatureItem] { get }
+    var primaryRoutes: [GreetPrimaryRoute] { get }
     var primaryRouteNextButtonText: Text { get }
     var primaryRouteDoneButtonText: Text { get }
     var primaryButtonText: Text { get }
@@ -66,10 +66,10 @@ public protocol OnboardingContent {
     var errorOKText: Text { get }
 }
 
-public extension OnboardingContent {
+public extension GreetContent {
     var appIcon: Image? { nil }
     var subtitle: Text? { nil }
-    var primaryRoutes: [OnboardingPrimaryRoute] { [] }
+    var primaryRoutes: [GreetPrimaryRoute] { [] }
     var primaryRouteNextButtonText: Text { Text("Next") }
     var primaryRouteDoneButtonText: Text { Text("Done") }
     var skipButtonText: Text? { nil }

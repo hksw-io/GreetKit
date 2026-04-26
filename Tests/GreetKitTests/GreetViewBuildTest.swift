@@ -4,20 +4,20 @@ import Testing
 @testable import GreetKit
 
 @MainActor
-struct OnboardingViewBuildTest {
+struct GreetViewBuildTest {
     @Test
     func viewConstructsWithMinimalContent() {
-        struct MinimalContent: OnboardingContent {
+        struct MinimalContent: GreetContent {
             var title: Text { Text("Welcome") }
-            var features: [OnboardingFeatureItem] {
-                [OnboardingFeatureItem(id: "one", description: Text("One."))]
+            var features: [GreetFeatureItem] {
+                [GreetFeatureItem(id: "one", description: Text("One."))]
             }
             var primaryButtonText: Text { Text("Go") }
             var errorAlertTitle: Text { Text("Error") }
             var errorOKText: Text { Text("OK") }
         }
 
-        _ = OnboardingView(
+        _ = GreetView(
             content: MinimalContent(),
             isLoading: .constant(false),
             errorMessage: .constant(nil),
@@ -27,13 +27,13 @@ struct OnboardingViewBuildTest {
 
     @Test
     func viewConstructsWithAllOptionalFields() {
-        struct RichContent: OnboardingContent {
+        struct RichContent: GreetContent {
             var appIcon: Image? { Image(systemName: "app.gift.fill") }
             var title: Text { Text("Welcome") }
             var subtitle: Text? { Text("Subtitle line.") }
-            var features: [OnboardingFeatureItem] {
+            var features: [GreetFeatureItem] {
                 [
-                    OnboardingFeatureItem(
+                    GreetFeatureItem(
                         id: "label",
                         image: Image(systemName: "star"),
                         label: Text("Label"),
@@ -46,7 +46,7 @@ struct OnboardingViewBuildTest {
             var errorOKText: Text { Text("OK") }
         }
 
-        _ = OnboardingView(
+        _ = GreetView(
             content: RichContent(),
             isLoading: .constant(true),
             errorMessage: .constant("Network offline"),
@@ -56,11 +56,11 @@ struct OnboardingViewBuildTest {
 
     @Test
     func viewConstructsWithConvenienceFeatureInitializer() {
-        struct ConvenienceContent: OnboardingContent {
+        struct ConvenienceContent: GreetContent {
             var title: Text { Text("Convenience") }
-            var features: [OnboardingFeatureItem] {
+            var features: [GreetFeatureItem] {
                 [
-                    OnboardingFeatureItem(
+                    GreetFeatureItem(
                         id: "localized-label",
                         systemImage: "sparkles",
                         label: "Localized label",
@@ -72,7 +72,7 @@ struct OnboardingViewBuildTest {
             var errorOKText: Text { Text("OK") }
         }
 
-        _ = OnboardingView(
+        _ = GreetView(
             content: ConvenienceContent(),
             isLoading: .constant(false),
             errorMessage: .constant(nil),
@@ -82,7 +82,7 @@ struct OnboardingViewBuildTest {
 
     @Test
     func featureInitializerStoresStableID() {
-        let feature = OnboardingFeatureItem(
+        let feature = GreetFeatureItem(
             id: "stable-feature",
             label: Text("Stable feature"),
             description: Text("A feature with stable identity."))
@@ -138,7 +138,7 @@ struct OnboardingViewBuildTest {
 
     @Test
     func viewConstructsWithGradientPaletteOverride() {
-        let palette = OnboardingGradientPalette(
+        let palette = GreetGradientPalette(
             light: .init(
                 base: .white,
                 primary: .pink,
@@ -168,8 +168,8 @@ struct OnboardingViewBuildTest {
 
     @Test
     func backgroundContextStoresColorScheme() {
-        let defaultContext = OnboardingBackgroundContext(reduceMotion: true)
-        let darkContext = OnboardingBackgroundContext(
+        let defaultContext = GreetBackgroundContext(reduceMotion: true)
+        let darkContext = GreetBackgroundContext(
             reduceMotion: false,
             brandColor: .pink,
             colorScheme: .dark)
@@ -280,7 +280,7 @@ struct OnboardingViewBuildTest {
 
     @Test
     func viewConstructsWithBackgroundAndPrimaryRouteChain() {
-        _ = OnboardingView(
+        _ = GreetView(
             content: BackgroundRouteContent(),
             isLoading: .constant(false),
             errorMessage: .constant(nil),
@@ -290,18 +290,18 @@ struct OnboardingViewBuildTest {
             primaryRouteDestination: { route in
                 Text(route.id)
             })
-            .onboardingBackground(.animatedGradient())
+            .greetBackground(.animatedGradient())
     }
 
     @Test
     func viewConstructsWithStandardStyleModifier() {
         _ = self.styledView()
-            .onboardingStyle(.standard)
+            .greetStyle(.standard)
     }
 
     @Test
     func viewConstructsWithCustomStyleColors() {
-        let style = OnboardingStyle(
+        let style = GreetStyle(
             tint: .indigo,
             titleColor: .primary,
             subtitleColor: .secondary,
@@ -313,13 +313,13 @@ struct OnboardingViewBuildTest {
             secondaryButtonColor: .secondary)
 
         _ = self.styledView()
-            .onboardingBackground(.softGradient)
-            .onboardingStyle(style)
+            .greetBackground(.softGradient)
+            .greetStyle(style)
     }
 
     @Test
     func styleProvidesCustomPrimaryButtonSurface() {
-        let style = OnboardingStyle(tint: .indigo, primaryButtonForegroundColor: .white)
+        let style = GreetStyle(tint: .indigo, primaryButtonForegroundColor: .white)
 
         _ = style.primaryButtonBackgroundStyle
         _ = style.primaryButtonForegroundStyle
@@ -327,11 +327,11 @@ struct OnboardingViewBuildTest {
 
     @Test
     func animatedGradientCentersAreStableWithReduceMotion() {
-        let first = OnboardingAnimatedGradientMotion.centers(
+        let first = GreetAnimatedGradientMotion.centers(
             phase: 0,
             reduceMotion: true,
             motion: .expressive)
-        let second = OnboardingAnimatedGradientMotion.centers(
+        let second = GreetAnimatedGradientMotion.centers(
             phase: 0.5,
             reduceMotion: true,
             motion: .expressive)
@@ -342,27 +342,27 @@ struct OnboardingViewBuildTest {
 
     @Test
     func animatedGradientCentersChangeAcrossPhases() {
-        let first = OnboardingAnimatedGradientMotion.centers(phase: 0, reduceMotion: false)
-        let second = OnboardingAnimatedGradientMotion.centers(phase: 0.25, reduceMotion: false)
+        let first = GreetAnimatedGradientMotion.centers(phase: 0, reduceMotion: false)
+        let second = GreetAnimatedGradientMotion.centers(phase: 0.25, reduceMotion: false)
 
         #expect(abs(first[0].x - second[0].x) > 0.0001)
     }
 
     @Test
     func expressiveAnimatedGradientMotionTravelsFartherThanSubtleMotion() {
-        let subtleStart = OnboardingAnimatedGradientMotion.centers(
+        let subtleStart = GreetAnimatedGradientMotion.centers(
             phase: 0,
             reduceMotion: false,
             motion: .subtle)
-        let subtleEnd = OnboardingAnimatedGradientMotion.centers(
+        let subtleEnd = GreetAnimatedGradientMotion.centers(
             phase: 0.25,
             reduceMotion: false,
             motion: .subtle)
-        let expressiveStart = OnboardingAnimatedGradientMotion.centers(
+        let expressiveStart = GreetAnimatedGradientMotion.centers(
             phase: 0,
             reduceMotion: false,
             motion: .expressive)
-        let expressiveEnd = OnboardingAnimatedGradientMotion.centers(
+        let expressiveEnd = GreetAnimatedGradientMotion.centers(
             phase: 0.25,
             reduceMotion: false,
             motion: .expressive)
@@ -372,9 +372,9 @@ struct OnboardingViewBuildTest {
 
     @Test
     func expressiveAnimatedGradientMotionHasHigherVisualContrastThanSubtleMotion() {
-        #expect(OnboardingGradientMotion.expressive.baseTintScale > OnboardingGradientMotion.subtle.baseTintScale)
-        #expect(OnboardingGradientMotion.expressive.blobOpacityScale > OnboardingGradientMotion.subtle.blobOpacityScale)
-        #expect(OnboardingGradientMotion.expressive.blobBlurScale < OnboardingGradientMotion.subtle.blobBlurScale)
+        #expect(GreetGradientMotion.expressive.baseTintScale > GreetGradientMotion.subtle.baseTintScale)
+        #expect(GreetGradientMotion.expressive.blobOpacityScale > GreetGradientMotion.subtle.blobOpacityScale)
+        #expect(GreetGradientMotion.expressive.blobBlurScale < GreetGradientMotion.subtle.blobBlurScale)
     }
 
     @Test
@@ -431,17 +431,17 @@ struct OnboardingViewBuildTest {
 
     @Test
     func viewConstructsWithPrimaryDestination() {
-        struct PrimaryRouteContent: OnboardingContent {
+        struct PrimaryRouteContent: GreetContent {
             var title: Text { Text("Primary") }
-            var features: [OnboardingFeatureItem] {
-                [OnboardingFeatureItem(id: "one-feature", description: Text("One feature."))]
+            var features: [GreetFeatureItem] {
+                [GreetFeatureItem(id: "one-feature", description: Text("One feature."))]
             }
             var primaryButtonText: Text { Text("Continue") }
             var errorAlertTitle: Text { Text("Error") }
             var errorOKText: Text { Text("OK") }
         }
 
-        _ = OnboardingView(
+        _ = GreetView(
             content: PrimaryRouteContent(),
             isLoading: .constant(false),
             errorMessage: .constant(nil),
@@ -454,16 +454,16 @@ struct OnboardingViewBuildTest {
 
     @Test
     func viewConstructsWithPrimaryRouteChain() {
-        struct PrimaryRouteChainContent: OnboardingContent {
+        struct PrimaryRouteChainContent: GreetContent {
             var title: Text { Text("Primary") }
-            var features: [OnboardingFeatureItem] {
-                [OnboardingFeatureItem(id: "one-feature", description: Text("One feature."))]
+            var features: [GreetFeatureItem] {
+                [GreetFeatureItem(id: "one-feature", description: Text("One feature."))]
             }
-            var primaryRoutes: [OnboardingPrimaryRoute] {
+            var primaryRoutes: [GreetPrimaryRoute] {
                 [
-                    OnboardingPrimaryRoute(id: "permissions"),
-                    OnboardingPrimaryRoute(id: "sample-data"),
-                    OnboardingPrimaryRoute(id: "notifications"),
+                    GreetPrimaryRoute(id: "permissions"),
+                    GreetPrimaryRoute(id: "sample-data"),
+                    GreetPrimaryRoute(id: "notifications"),
                 ]
             }
             var primaryButtonText: Text { Text("Continue") }
@@ -473,7 +473,7 @@ struct OnboardingViewBuildTest {
             var errorOKText: Text { Text("OK") }
         }
 
-        _ = OnboardingView(
+        _ = GreetView(
             content: PrimaryRouteChainContent(),
             isLoading: .constant(false),
             errorMessage: .constant(nil),
@@ -487,20 +487,20 @@ struct OnboardingViewBuildTest {
 
     @Test
     func viewConstructsWithPrimaryRouteChainAndErrorMessage() {
-        struct PrimaryRouteErrorContent: OnboardingContent {
+        struct PrimaryRouteErrorContent: GreetContent {
             var title: Text { Text("Primary") }
-            var features: [OnboardingFeatureItem] {
-                [OnboardingFeatureItem(id: "one-feature", description: Text("One feature."))]
+            var features: [GreetFeatureItem] {
+                [GreetFeatureItem(id: "one-feature", description: Text("One feature."))]
             }
-            var primaryRoutes: [OnboardingPrimaryRoute] {
-                [OnboardingPrimaryRoute(id: "permissions")]
+            var primaryRoutes: [GreetPrimaryRoute] {
+                [GreetPrimaryRoute(id: "permissions")]
             }
             var primaryButtonText: Text { Text("Continue") }
             var errorAlertTitle: Text { Text("Error") }
             var errorOKText: Text { Text("OK") }
         }
 
-        _ = OnboardingView(
+        _ = GreetView(
             content: PrimaryRouteErrorContent(),
             isLoading: .constant(false),
             errorMessage: .constant("Route failed"),
@@ -513,17 +513,17 @@ struct OnboardingViewBuildTest {
 
     @Test
     func viewConstructsWithBlockingDismissalPolicy() {
-        struct BlockingContent: OnboardingContent {
+        struct BlockingContent: GreetContent {
             var title: Text { Text("Blocking") }
-            var features: [OnboardingFeatureItem] {
-                [OnboardingFeatureItem(id: "one-feature", description: Text("One feature."))]
+            var features: [GreetFeatureItem] {
+                [GreetFeatureItem(id: "one-feature", description: Text("One feature."))]
             }
             var primaryButtonText: Text { Text("Continue") }
             var errorAlertTitle: Text { Text("Error") }
             var errorOKText: Text { Text("OK") }
         }
 
-        _ = OnboardingView(
+        _ = GreetView(
             content: BlockingContent(),
             isLoading: .constant(false),
             errorMessage: .constant(nil),
@@ -534,42 +534,42 @@ struct OnboardingViewBuildTest {
 
     @Test
     func primaryRouteStoresStableID() {
-        let route = OnboardingPrimaryRoute(id: "sample-data")
+        let route = GreetPrimaryRoute(id: "sample-data")
 
         #expect(route.id == "sample-data")
     }
 
     @Test
     func viewConstructsWithLongLocalizedContentAndManyFeatures() {
-        struct LongContent: OnboardingContent {
+        struct LongContent: GreetContent {
             var appIcon: Image? { Image(systemName: "app.badge.fill") }
             var title: Text {
-                Text("A much longer onboarding title that must wrap cleanly on compact devices")
+                Text("A much longer greet title that must wrap cleanly on compact devices")
             }
             var subtitle: Text? {
                 Text("This subtitle is intentionally longer so narrow presentations and larger Dynamic Type sizes still have room to breathe.")
             }
-            var features: [OnboardingFeatureItem] {
+            var features: [GreetFeatureItem] {
                 (1...12).map { index in
-                    OnboardingFeatureItem(
+                    GreetFeatureItem(
                         id: "feature-\(index)",
                         image: Image(systemName: "checkmark.circle.fill"),
-                        label: Text("Onboarding feature \(index) with a longer localized label"),
+                        label: Text("Greet feature \(index) with a longer localized label"),
                         description: Text(
-                            "This onboarding description is long enough to wrap over multiple lines while keeping the icon, text, and action area stable."))
+                            "This greet description is long enough to wrap over multiple lines while keeping the icon, text, and action area stable."))
                 }
             }
             var primaryButtonText: Text {
                 Text("Get started with all sample data and preferences")
             }
             var skipButtonText: Text? {
-                Text("Skip this longer onboarding flow for now")
+                Text("Skip this longer greet flow for now")
             }
             var errorAlertTitle: Text { Text("Something went wrong") }
             var errorOKText: Text { Text("OK") }
         }
 
-        _ = OnboardingView(
+        _ = GreetView(
             content: LongContent(),
             isLoading: .constant(false),
             errorMessage: .constant(nil),
@@ -579,13 +579,13 @@ struct OnboardingViewBuildTest {
 
     @Test
     func viewConstructsWhenComputedFeaturesRecreateValues() {
-        struct ComputedContent: OnboardingContent {
+        struct ComputedContent: GreetContent {
             var title: Text { Text("Computed") }
-            var features: [OnboardingFeatureItem] {
+            var features: [GreetFeatureItem] {
                 [
-                    OnboardingFeatureItem(id: "first", description: Text("First computed feature.")),
-                    OnboardingFeatureItem(id: "second", description: Text("Second computed feature.")),
-                    OnboardingFeatureItem(id: "third", description: Text("Third computed feature.")),
+                    GreetFeatureItem(id: "first", description: Text("First computed feature.")),
+                    GreetFeatureItem(id: "second", description: Text("Second computed feature.")),
+                    GreetFeatureItem(id: "third", description: Text("Third computed feature.")),
                 ]
             }
             var primaryButtonText: Text { Text("Go") }
@@ -593,7 +593,7 @@ struct OnboardingViewBuildTest {
             var errorOKText: Text { Text("OK") }
         }
 
-        _ = OnboardingView(
+        _ = GreetView(
             content: ComputedContent(),
             isLoading: .constant(false),
             errorMessage: .constant(nil),
@@ -603,10 +603,10 @@ struct OnboardingViewBuildTest {
 
     @Test
     func viewConstructsAcrossLoadingAndErrorStates() {
-        struct StateContent: OnboardingContent {
+        struct StateContent: GreetContent {
             var title: Text { Text("State") }
-            var features: [OnboardingFeatureItem] {
-                [OnboardingFeatureItem(id: "state", description: Text("State feature."))]
+            var features: [GreetFeatureItem] {
+                [GreetFeatureItem(id: "state", description: Text("State feature."))]
             }
             var primaryButtonText: Text { Text("Start") }
             var skipButtonText: Text? { Text("Skip") }
@@ -614,14 +614,14 @@ struct OnboardingViewBuildTest {
             var errorOKText: Text { Text("OK") }
         }
 
-        _ = OnboardingView(
+        _ = GreetView(
             content: StateContent(),
             isLoading: .constant(true),
             errorMessage: .constant("Network offline"),
             onPrimary: {},
             onSkip: {})
 
-        _ = OnboardingView(
+        _ = GreetView(
             content: StateContent(),
             isLoading: .constant(false),
             errorMessage: .constant("Retry failed"),
@@ -629,13 +629,13 @@ struct OnboardingViewBuildTest {
             onSkip: {})
     }
 
-    private func backgroundView(_ background: OnboardingBackground) -> some View {
+    private func backgroundView(_ background: GreetBackground) -> some View {
         self.styledView()
-            .onboardingBackground(background)
+            .greetBackground(background)
     }
 
-    private func styledView() -> OnboardingView<BackgroundContent> {
-        OnboardingView(
+    private func styledView() -> GreetView<BackgroundContent> {
+        GreetView(
             content: BackgroundContent(),
             isLoading: .constant(false),
             errorMessage: .constant(nil),
@@ -652,25 +652,25 @@ struct OnboardingViewBuildTest {
     }
 }
 
-private struct BackgroundContent: OnboardingContent {
+private struct BackgroundContent: GreetContent {
     var title: Text { Text("Background") }
-    var features: [OnboardingFeatureItem] {
-        [OnboardingFeatureItem(id: "background-feature", description: Text("Background feature."))]
+    var features: [GreetFeatureItem] {
+        [GreetFeatureItem(id: "background-feature", description: Text("Background feature."))]
     }
     var primaryButtonText: Text { Text("Continue") }
     var errorAlertTitle: Text { Text("Error") }
     var errorOKText: Text { Text("OK") }
 }
 
-private struct BackgroundRouteContent: OnboardingContent {
+private struct BackgroundRouteContent: GreetContent {
     var title: Text { Text("Background route") }
-    var features: [OnboardingFeatureItem] {
-        [OnboardingFeatureItem(id: "background-route-feature", description: Text("Background route feature."))]
+    var features: [GreetFeatureItem] {
+        [GreetFeatureItem(id: "background-route-feature", description: Text("Background route feature."))]
     }
-    var primaryRoutes: [OnboardingPrimaryRoute] {
+    var primaryRoutes: [GreetPrimaryRoute] {
         [
-            OnboardingPrimaryRoute(id: "first-route"),
-            OnboardingPrimaryRoute(id: "second-route"),
+            GreetPrimaryRoute(id: "first-route"),
+            GreetPrimaryRoute(id: "second-route"),
         ]
     }
     var primaryButtonText: Text { Text("Continue") }

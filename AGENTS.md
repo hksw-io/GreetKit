@@ -4,7 +4,7 @@ Instructions for agents working in this repository. RFC 2119 keywords apply.
 
 ## Package Scope
 
-- This is a Swift package for a reusable SwiftUI onboarding experience.
+- This is a Swift package for a reusable SwiftUI welcome experience.
 - The supported product surfaces are iOS 26+ and macOS 26+.
 - watchOS is out of scope unless the user explicitly asks for watchOS work. Do not widen implementation, tests, or compatibility policy for watchOS by default.
 - Keep the library presentational and reusable. App-specific policy belongs in the consuming app unless the public API is explicitly changed.
@@ -22,7 +22,7 @@ Instructions for agents working in this repository. RFC 2119 keywords apply.
 
 ## GreetKit Rules
 
-- `OnboardingView` should remain a reusable SwiftUI view driven by `OnboardingContent`.
+- `GreetView` should remain a reusable SwiftUI view driven by `GreetContent`.
 - The consuming app owns loading, errors, completion, dismissal, and persistence. Keep this package presentational unless the requested change explicitly expands scope.
 - `isLoading` and `errorMessage` bindings are part of the public behavior and must stay predictable under repeated taps, alert dismissal, and optional skip states.
 - Feature rows must keep stable identity and work with optional icons, labels, subtitles, skip buttons, and long localized text.
