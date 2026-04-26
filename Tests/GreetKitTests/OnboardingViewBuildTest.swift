@@ -268,12 +268,13 @@ struct OnboardingViewBuildTest {
 
     @Test
     func footerControlsUseCompactVisualSpacingWithAccessibleSkipHeight() {
-        #expect(Tokens.Layout.footerControlSpacing == Tokens.Spacing.small)
+        #expect(Tokens.Layout.footerControlSpacing == Tokens.Spacing.medium)
         #expect(Tokens.Layout.minimumControlHeight == 44)
     }
 
     @Test
     func footerUsesAsymmetricPaddingToSitCloserToBottomEdge() {
+        #expect(Tokens.Layout.footerBottomPadding == 0)
         #expect(Tokens.Layout.footerBottomPadding < Tokens.Layout.footerTopPadding)
     }
 
