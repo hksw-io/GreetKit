@@ -577,14 +577,15 @@ private struct OnboardingPrimaryRouteDestinationContainer<Content: OnboardingCon
                 .buttonStyle(.plain)
                 .controlSize(.extraLarge)
                 .background {
-                    RoundedRectangle(cornerRadius: Tokens.Radius.large, style: .continuous)
+                    RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous)
                         .fill(self.style.primaryButtonBackgroundStyle)
                 }
-                .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.large, style: .continuous))
-                .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.large, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
                 .frame(maxWidth: Tokens.Layout.contentMaxWidth)
                 .padding(.horizontal, self.horizontalPadding(for: geometry.size.width))
-                .padding(.vertical, Tokens.Layout.footerVerticalPadding)
+                .padding(.top, Tokens.Layout.footerTopPadding)
+                .padding(.bottom, Tokens.Layout.footerBottomPadding)
                 .frame(maxWidth: .infinity)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
@@ -733,7 +734,7 @@ private struct OnboardingFooterSection<Content: OnboardingContent>: View {
     let onSkip: () -> Void
 
     var body: some View {
-        VStack(spacing: Tokens.Spacing.medium) {
+        VStack(spacing: Tokens.Layout.footerControlSpacing) {
             Button {
                 self.onPrimary()
             } label: {
@@ -768,11 +769,11 @@ private struct OnboardingFooterSection<Content: OnboardingContent>: View {
             .controlSize(.extraLarge)
             .disabled(self.isLoading)
             .background {
-                RoundedRectangle(cornerRadius: Tokens.Radius.large, style: .continuous)
+                RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous)
                     .fill(self.style.primaryButtonBackgroundStyle)
             }
-            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.large, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.large, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
             .opacity(self.isLoading ? 0.65 : 1)
 
             if let skipText = self.content.skipButtonText {
@@ -783,14 +784,18 @@ private struct OnboardingFooterSection<Content: OnboardingContent>: View {
                         .font(.subheadline)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, minHeight: Tokens.Layout.minimumControlHeight)
+                        .frame(
+                            maxWidth: .infinity,
+                            minHeight: Tokens.Layout.minimumControlHeight,
+                            alignment: .top)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(self.style.secondaryButtonForegroundStyle)
                 .disabled(self.isLoading)
             }
         }
-        .padding(.vertical, Tokens.Layout.footerVerticalPadding)
+        .padding(.top, Tokens.Layout.footerTopPadding)
+        .padding(.bottom, Tokens.Layout.footerBottomPadding)
     }
 }
 

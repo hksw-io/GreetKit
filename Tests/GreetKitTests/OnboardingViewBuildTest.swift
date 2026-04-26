@@ -262,6 +262,22 @@ struct OnboardingViewBuildTest {
     }
 
     @Test
+    func primaryButtonRadiusUsesRounderControlShape() {
+        #expect(Tokens.Radius.button > Tokens.Radius.large)
+    }
+
+    @Test
+    func footerControlsUseCompactVisualSpacingWithAccessibleSkipHeight() {
+        #expect(Tokens.Layout.footerControlSpacing == Tokens.Spacing.small)
+        #expect(Tokens.Layout.minimumControlHeight == 44)
+    }
+
+    @Test
+    func footerUsesAsymmetricPaddingToSitCloserToBottomEdge() {
+        #expect(Tokens.Layout.footerBottomPadding < Tokens.Layout.footerTopPadding)
+    }
+
+    @Test
     func viewConstructsWithBackgroundAndPrimaryRouteChain() {
         _ = OnboardingView(
             content: BackgroundRouteContent(),

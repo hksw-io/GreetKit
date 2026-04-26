@@ -10,6 +10,7 @@ enum Tokens {
 
     enum Radius {
         static let large: CGFloat = 16
+        static let button: CGFloat = 24
         static let iconScale: CGFloat = 0.22
     }
 
@@ -19,7 +20,9 @@ enum Tokens {
         static let regularHorizontalPadding: CGFloat = 24
         static let compactWidthBreakpoint: CGFloat = 390
         static let compactSheetMinWidth: CGFloat = 320
-        static let footerVerticalPadding: CGFloat = 20
+        static let footerControlSpacing: CGFloat = Spacing.small
+        static let footerTopPadding: CGFloat = 20
+        static let footerBottomPadding: CGFloat = 8
         static let minimumControlHeight: CGFloat = 44
         static let buttonLabelMinHeight: CGFloat = 28
     }
