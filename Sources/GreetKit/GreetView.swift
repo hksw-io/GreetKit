@@ -573,6 +573,7 @@ private struct GreetPrimaryRouteDestinationContainer<Content: GreetContent, Dest
                         .foregroundStyle(self.style.primaryButtonForegroundStyle)
                         .frame(maxWidth: .infinity, minHeight: Tokens.Layout.buttonLabelMinHeight)
                         .padding(.vertical, Tokens.Platform.buttonVerticalPadding)
+                        .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
                 }
                 .buttonStyle(.plain)
                 .controlSize(.extraLarge)
@@ -581,7 +582,6 @@ private struct GreetPrimaryRouteDestinationContainer<Content: GreetContent, Dest
                         .fill(self.style.primaryButtonBackgroundStyle)
                 }
                 .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
-                .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
                 .frame(maxWidth: Tokens.Layout.contentMaxWidth)
                 .padding(.horizontal, self.horizontalPadding(for: geometry.size.width))
                 .padding(.top, Tokens.Layout.footerTopPadding)
@@ -764,6 +764,7 @@ private struct GreetFooterSection<Content: GreetContent>: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(self.content.primaryButtonText)
                 .accessibilityValue(self.isLoading ? Text("Loading") : Text(""))
+                .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
             }
             .buttonStyle(.plain)
             .controlSize(.extraLarge)
@@ -773,7 +774,6 @@ private struct GreetFooterSection<Content: GreetContent>: View {
                     .fill(self.style.primaryButtonBackgroundStyle)
             }
             .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
             .opacity(self.isLoading ? 0.65 : 1)
 
             if let skipText = self.content.skipButtonText {
