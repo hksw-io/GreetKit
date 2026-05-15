@@ -705,6 +705,7 @@ private struct GreetFeatureRow: View {
                         .font(.headline)
                         .greetOptionalForegroundStyle(self.style.featureTitleColor)
                         .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityAddTraits(.isHeader)
                 }
                 self.feature.description
                     .font(.subheadline)
@@ -717,7 +718,6 @@ private struct GreetFeatureRow: View {
 
             Spacer(minLength: 0)
         }
-        .accessibilityElement(children: .combine)
         .opacity(isVisible ? 1 : 0)
         .offset(y: isVisible ? 0 : (self.reduceMotion ? 0 : Tokens.Motion.revealOffset))
         .animation(
