@@ -17,6 +17,7 @@ All notable changes to GreetKit are recorded here. The format follows
   `allowsInteractiveDismissal` is `true`. A blocking setup flow stays blocked, and Escape never
   fires a callback with nothing on screen to match it. Mac users can now complete or leave the
   sheet without a pointer.
+- A light impact on the primary action on iOS. The skip button gets none, and macOS is unchanged.
 - macOS pointer feedback on the skip button. The primary button gets hover from the system button
   style; the borderless skip button now takes the link pointer so it reads as clickable.
 

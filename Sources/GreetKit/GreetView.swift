@@ -502,13 +502,19 @@ private struct GreetPrimaryButton: View {
     var loading: Loading?
     let action: () -> Void
 
+    @State private var activationCount = 0
+
     var body: some View {
-        Button(action: self.action) {
+        Button {
+            self.activationCount += 1
+            self.action()
+        } label: {
             self.labelContent
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(self.label)
                 .greetAccessibilityValue(self.isLoading ? self.loading?.accessibilityValue : nil)
         }
+        .greetPrimarySensoryFeedback(trigger: self.activationCount)
         .buttonStyle(.glassProminent)
         .buttonBorderShape(.capsule)
         .buttonSizing(.flexible)
@@ -658,6 +664,20 @@ private extension View {
         } else {
             self
         }
+    }
+
+    /// Confirms the primary action with a light impact on iOS.
+    ///
+    /// The primary button commits the person to setup, which is the one moment in this sheet
+    /// worth a haptic. The skip button deliberately gets none. Macs are left alone — a click
+    /// there is not conventionally answered with feedback.
+    @ViewBuilder
+    func greetPrimarySensoryFeedback(trigger: Int) -> some View {
+        #if os(iOS)
+            self.sensoryFeedback(.impact, trigger: trigger)
+        #else
+            self
+        #endif
     }
 
     /// Gives the borderless skip button a pointer cue on macOS.
