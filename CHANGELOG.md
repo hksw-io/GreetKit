@@ -6,6 +6,11 @@ All notable changes to GreetKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-07-25
+
+Makes the package feel native on each platform rather than presenting one iOS design on both, and
+adopts the iOS 26 / macOS 26 control layer in place of three hand-rolled equivalents.
+
 ### Added
 
 - **Breaking.** `GreetBackgroundContext` gains `reduceTransparency` and `colorSchemeContrast`, both
@@ -27,7 +32,6 @@ All notable changes to GreetKit are recorded here. The format follows
   (`.buttonStyle(.glassProminent)`) instead of a hand-drawn pill. `GreetStyle.tint` colors it, and
   the platform supplies the pressed, hovered, focused, disabled, and Increase Contrast treatments
   it previously faked. On macOS the button now reacts to the pointer and takes a focus ring.
-
 - The animated gradient stops drawing on macOS while the app is inactive. It was running a 30fps
   `Canvas` behind whatever window the person had moved on to. Resuming is seamless because the phase
   still comes from the timeline date rather than being pinned.
@@ -72,8 +76,8 @@ All notable changes to GreetKit are recorded here. The format follows
   scrollers. iOS still hides it.
 - The pinned footer now uses `safeAreaBar(edge:)` and the platform's hard scroll edge effect
   (`scrollEdgeEffectStyle(.hard, for: .bottom)`) instead of a measured mask, so overflowing content
-  is separated from the footer the way the OS separates it everywhere else. The overview and the route destinations no longer wrap themselves
-  in a `GeometryReader`.
+  is separated from the footer the way the OS separates it everywhere else. The overview and the
+  route destinations no longer wrap themselves in a `GeometryReader`.
 
 ### Removed
 
@@ -131,5 +135,6 @@ First tagged release. Everything before this tag was consumed from the `master` 
   Both were already marked deprecated and are removed here rather than after 1.0.0, since no tagged
   release ever shipped them.
 
-[unreleased]: https://github.com/hksw-io/GreetKit/compare/1.0.0...HEAD
+[unreleased]: https://github.com/hksw-io/GreetKit/compare/2.0.0...HEAD
+[2.0.0]: https://github.com/hksw-io/GreetKit/compare/1.0.0...2.0.0
 [1.0.0]: https://github.com/hksw-io/GreetKit/releases/tag/1.0.0
