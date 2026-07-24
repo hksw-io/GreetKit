@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # The package needs an SDK that has iOS 26 / macOS 26. Pick the newest Xcode the
+      # runner image happens to ship rather than pinning a version that may not exist yet.
+      - name: Select newest Xcode
+        run: |
+          set -euo pipefail
+          latest=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Selecting $latest"
+          sudo xcode-select -s "$latest"
+          xcodebuild -version
+          swift --version
+
+      - name: Check for whitespace errors
+        if: github.event_name == 'pull_request'
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
+
+      - name: Build (macOS)
+        run: swift build
+
+      - name: Test (macOS)
+        run: swift test
+
+      - name: Build (iOS)
+        run: xcodebuild -scheme GreetKit -destination 'generic/platform=iOS' build
