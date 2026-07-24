@@ -570,24 +570,27 @@ private struct GreetPrimaryButton: View {
         return loading.accessibilityValue
     }
 
-    /// Cross-fades the label and the progress indicator in place.
+    /// Cross-fades the label and the progress indicator in place, with the label alone deciding
+    /// the size.
     ///
-    /// The loading state used to lay out a second copy of the label in an `HStack` beside the
-    /// spinner. Centring that pair put the text roughly half a spinner-width to the trailing side
-    /// of where the plain label sat, so starting to load slid the text sideways while two copies
-    /// of it cross-faded through each other — under a glass material that reads as the button
-    /// wobbling. One label, one position, and the `ZStack` keeps the button's size constant.
+    /// The spinner is an overlay rather than a sibling in a stack, and that is load-bearing. A
+    /// stack sizes to `max(label, spinner)`, and an indeterminate `ProgressView` reports a size
+    /// that varies by a fraction of a point as it animates. Those two heights are close enough
+    /// that the max flipped between them every frame, so the button, the footer, and the whole
+    /// `safeAreaBar` re-measured continuously — over 11,000 times a minute, swinging a full point
+    /// — while the button's own body never re-evaluated. Pure layout churn, and the reason the
+    /// button looked like jelly while loading. An overlay takes its size from what it covers and
+    /// contributes nothing back.
     @ViewBuilder
     private var labelContent: some View {
         if self.loading != nil {
-            ZStack {
-                self.styledLabel
-                    .opacity(self.isLoading ? 0 : 1)
-
-                ProgressView()
-                    .controlSize(.small)
-                    .opacity(self.isLoading ? 1 : 0)
-            }
+            self.styledLabel
+                .opacity(self.isLoading ? 0 : 1)
+                .overlay {
+                    ProgressView()
+                        .controlSize(.small)
+                        .opacity(self.isLoading ? 1 : 0)
+                }
         } else {
             self.styledLabel
         }

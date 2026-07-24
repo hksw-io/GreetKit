@@ -43,6 +43,12 @@ All notable changes to GreetKit are recorded here. The format follows
 
 ### Fixed
 
+- The primary button no longer churns the layout while a loading state is possible. The progress
+  indicator sat beside the label in a stack, so the button sized to `max(label, spinner)` — and an
+  indeterminate `ProgressView` reports a size that varies by a fraction of a point as it animates.
+  The two heights were close enough that the max flipped every frame, re-measuring the button, the
+  footer, and the whole bottom bar over 11,000 times a minute across a full point of travel. The
+  spinner is now an overlay, so it takes its size from the label and contributes nothing back.
 - The primary button no longer shifts its label when loading starts. The loading state laid out a
   second copy of the label beside the spinner, and centring that pair moved the text sideways while
   two copies cross-faded through each other — under a glass material that read as the button
