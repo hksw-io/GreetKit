@@ -189,6 +189,9 @@ public struct GreetView<Content: GreetContent>: View {
                 content: self.content,
                 isLoading: self.isLoading,
                 style: self.style,
+                allowsCancelShortcut: GreetKeyboardPolicy.allowsCancelShortcut(
+                    hasSkipButton: self.content.skipButtonText != nil,
+                    allowsInteractiveDismissal: self.allowsInteractiveDismissal),
                 onPrimary: self.performPrimaryAction,
                 onSkip: self.onSkip)
                 .frame(maxWidth: Tokens.Layout.contentMaxWidth)
@@ -252,6 +255,18 @@ public struct GreetView<Content: GreetContent>: View {
             set: { newValue in
                 if !newValue { self.errorMessage = nil }
             })
+    }
+}
+
+/// Decides whether Escape may stand in for the skip action.
+///
+/// Escape fires `onSkip`, which is a real caller callback rather than a plain dismissal, so it is
+/// only bound where the skip button is actually on screen and dismissal is allowed. That keeps the
+/// keyboard from triggering something the person cannot see, and keeps blocking setup flows
+/// blocking.
+enum GreetKeyboardPolicy {
+    static func allowsCancelShortcut(hasSkipButton: Bool, allowsInteractiveDismissal: Bool) -> Bool {
+        hasSkipButton && allowsInteractiveDismissal
     }
 }
 
@@ -486,6 +501,7 @@ private struct GreetPrimaryButton: View {
         .buttonBorderShape(.capsule)
         .buttonSizing(.flexible)
         .controlSize(.large)
+        .keyboardShortcut(.defaultAction)
         .disabled(self.isLoading)
     }
 
@@ -526,6 +542,7 @@ private struct GreetFooterSection<Content: GreetContent>: View {
     let content: Content
     let isLoading: Bool
     let style: GreetStyle
+    let allowsCancelShortcut: Bool
     let onPrimary: () -> Void
     let onSkip: () -> Void
 
@@ -555,6 +572,7 @@ private struct GreetFooterSection<Content: GreetContent>: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(self.style.secondaryButtonForegroundStyle)
+                .greetCancelShortcut(self.allowsCancelShortcut)
                 .disabled(self.isLoading)
             }
         }
@@ -624,6 +642,15 @@ private extension View {
     func greetOptionalForegroundStyle(_ color: Color?) -> some View {
         if let color {
             self.foregroundStyle(color)
+        } else {
+            self
+        }
+    }
+
+    @ViewBuilder
+    func greetCancelShortcut(_ isEnabled: Bool) -> some View {
+        if isEnabled {
+            self.keyboardShortcut(.cancelAction)
         } else {
             self
         }

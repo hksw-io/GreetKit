@@ -6,6 +6,14 @@ All notable changes to GreetKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Keyboard support. Return triggers the primary action — including Next and Done inside a route
+  chain — and Escape triggers the skip action, but only when `skipButtonText` is non-nil and
+  `allowsInteractiveDismissal` is `true`. A blocking setup flow stays blocked, and Escape never
+  fires a callback with nothing on screen to match it. Mac users can now complete or leave the
+  sheet without a pointer.
+
 ### Changed
 
 - **Breaking.** The primary button is now the system prominent glass button

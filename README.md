@@ -223,6 +223,8 @@ var primaryButtonLoadingAccessibilityValue: Text {
 
 Feature icons and the app icon are hidden from VoiceOver; feature labels carry the header trait and read separately from their descriptions. Reduce Motion removes the feature reveal animation, the route slide transitions, and the animated gradient's movement.
 
+Return triggers the primary action, including Next and Done inside a route chain. Escape triggers the skip action, but only when `skipButtonText` is non-nil and `allowsInteractiveDismissal` is `true` — a blocking setup flow stays blocked, and Escape never fires `onSkip` when there is no skip button on screen.
+
 ## Local development
 
 Run the package tests from the package root:
