@@ -23,6 +23,11 @@ All notable changes to GreetKit are recorded here. The format follows
   the platform supplies the pressed, hovered, focused, disabled, and Increase Contrast treatments
   it previously faked. On macOS the button now reacts to the pointer and takes a focus ring.
 
+- Motion splits by platform. `Tokens.Motion` was the only token group with no platform branch, so
+  the Mac got the iPhone's 38pt staggered reveal and waited over a second for the last feature row
+  to settle. macOS now uses a 12pt travel and roughly a third of the settle time; iOS is unchanged.
+- Animations use springs (`.smooth`) instead of `.easeOut`/`.easeInOut`, and route transitions use
+  the built-in `.push(from:)` rather than a hand-built asymmetric move-and-fade.
 - macOS sheets are window shaped. The 320x620 floor was an iPhone aspect on a desktop; the minimum
   is now 480x420 with an ideal of 560x520, and the sheet also reports an ideal size instead of only
   a minimum. Override it with `.presentationSizing(_:)` on the presentation.

@@ -233,18 +233,14 @@ public struct GreetView<Content: GreetContent>: View {
 
         switch self.routeState.transitionDirection {
         case .forward:
-            return .asymmetric(
-                insertion: .move(edge: .trailing).combined(with: .opacity),
-                removal: .move(edge: .leading).combined(with: .opacity))
+            return .push(from: .trailing)
         case .backward:
-            return .asymmetric(
-                insertion: .move(edge: .leading).combined(with: .opacity),
-                removal: .move(edge: .trailing).combined(with: .opacity))
+            return .push(from: .leading)
         }
     }
 
     private var routeAnimation: Animation? {
-        self.reduceMotion ? nil : .easeInOut(duration: Tokens.Motion.routeTransitionDuration)
+        self.reduceMotion ? nil : .smooth(duration: Tokens.Motion.routeTransitionDuration)
     }
 
     private var primaryRoutePhaseID: String {
@@ -472,7 +468,7 @@ private struct GreetFeatureRow: View {
         .opacity(isVisible ? 1 : 0)
         .offset(y: isVisible ? 0 : (self.reduceMotion ? 0 : Tokens.Motion.revealOffset))
         .animation(
-            self.reduceMotion ? nil : .easeOut(duration: Tokens.Motion.revealDuration).delay(delay),
+            self.reduceMotion ? nil : .smooth(duration: Tokens.Motion.revealDuration).delay(delay),
             value: isVisible)
     }
 }

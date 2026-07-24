@@ -23,6 +23,21 @@ struct LayoutAndMotionTests {
         #expect(Tokens.Motion.revealDelay(for: -3) == Tokens.Motion.featureBaseDelay)
     }
 
+    /// The reveal is tuned for a phone. On a Mac the same choreography reads as a marketing
+    /// entrance, so the travel and the settle time are cut.
+    @Test
+    func macMotionIsShorterThanTheiOSReveal() {
+        let lastRowSettles = Tokens.Motion.revealDelay(for: 100) + Tokens.Motion.revealDuration
+
+        #if os(macOS)
+            #expect(Tokens.Motion.revealOffset == 12)
+            #expect(lastRowSettles < 0.6)
+        #else
+            #expect(Tokens.Motion.revealOffset == 38)
+            #expect(lastRowSettles > 1)
+        #endif
+    }
+
     @Test
     func layoutUsesCompactPaddingAtBreakpoint() {
         let padding = LayoutMetrics.horizontalPadding(

@@ -23,13 +23,26 @@ enum Tokens {
         static let footerBottomPadding: CGFloat = 0
     }
 
+    /// Kept here rather than in `Platform` so the shared `revealDelay(for:)` stays next to the
+    /// values it composes.
     enum Motion {
-        static let featureBaseDelay: Double = 0.3
-        static let featureStaggerDelay: Double = 0.17
-        static let maxFeatureStaggerDelay: Double = 0.68
-        static let revealDuration: Double = 0.48
-        static let revealOffset: CGFloat = 38
-        static let routeTransitionDuration: Double = 0.32
+        #if os(macOS)
+            // A Mac sheet should be ready to use, not perform an entrance. Shorter travel,
+            // tighter stagger, and roughly a third of the settle time.
+            static let featureBaseDelay: Double = 0.12
+            static let featureStaggerDelay: Double = 0.05
+            static let maxFeatureStaggerDelay: Double = 0.2
+            static let revealDuration: Double = 0.26
+            static let revealOffset: CGFloat = 12
+            static let routeTransitionDuration: Double = 0.26
+        #else
+            static let featureBaseDelay: Double = 0.3
+            static let featureStaggerDelay: Double = 0.17
+            static let maxFeatureStaggerDelay: Double = 0.68
+            static let revealDuration: Double = 0.48
+            static let revealOffset: CGFloat = 38
+            static let routeTransitionDuration: Double = 0.32
+        #endif
 
         static func revealDelay(for index: Int) -> Double {
             let staggerDelay = min(Double(max(0, index)) * self.featureStaggerDelay, self.maxFeatureStaggerDelay)
