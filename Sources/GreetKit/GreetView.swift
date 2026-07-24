@@ -572,6 +572,7 @@ private struct GreetFooterSection<Content: GreetContent>: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(self.style.secondaryButtonForegroundStyle)
+                .greetLinkPointer()
                 .greetCancelShortcut(self.allowsCancelShortcut)
                 .disabled(self.isLoading)
             }
@@ -645,6 +646,19 @@ private extension View {
         } else {
             self
         }
+    }
+
+    /// Gives the borderless skip button a pointer cue on macOS.
+    ///
+    /// The primary button gets hover from `.glassProminent`, but a plain text button has nothing
+    /// to tell a Mac user it is clickable until the pointer changes over it.
+    @ViewBuilder
+    func greetLinkPointer() -> some View {
+        #if os(macOS)
+            self.pointerStyle(.link)
+        #else
+            self
+        #endif
     }
 
     @ViewBuilder
