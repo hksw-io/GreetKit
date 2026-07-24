@@ -1,3 +1,4 @@
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 enum Tokens {
@@ -9,7 +10,6 @@ enum Tokens {
     }
 
     enum Radius {
-        static let large: CGFloat = 16
         static let button: CGFloat = 24
         static let iconScale: CGFloat = 0.22
     }
@@ -20,6 +20,7 @@ enum Tokens {
         static let regularHorizontalPadding: CGFloat = 24
         static let compactWidthBreakpoint: CGFloat = 390
         static let compactSheetMinWidth: CGFloat = 320
+        static let compactSheetMinHeight: CGFloat = 620
         static let footerControlSpacing: CGFloat = Spacing.medium
         static let footerTopPadding: CGFloat = 20
         static let footerBottomPadding: CGFloat = 0
@@ -66,10 +67,9 @@ enum Tokens {
     static var background: Color {
         #if os(macOS)
             Color(nsColor: .windowBackgroundColor)
-        #elseif os(iOS)
-            Color(.systemBackground)
         #else
-            Color.black
+            Color(uiColor: .systemBackground)
         #endif
     }
 }
+#endif

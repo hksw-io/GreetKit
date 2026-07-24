@@ -1,7 +1,7 @@
 #if os(iOS) || os(macOS)
 import SwiftUI
 
-public struct GreetStyle {
+public struct GreetStyle: Sendable {
     public var tint: Color?
     public var titleColor: Color?
     public var subtitleColor: Color?

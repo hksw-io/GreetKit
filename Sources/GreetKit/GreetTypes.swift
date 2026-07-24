@@ -1,6 +1,7 @@
+#if os(iOS) || os(macOS)
 import SwiftUI
 
-public struct GreetFeatureItem: Identifiable {
+public struct GreetFeatureItem: Identifiable, Sendable {
     public let id: String
     public let image: Image?
     public let label: Text?
@@ -24,27 +25,9 @@ public struct GreetFeatureItem: Identifiable {
         self.label = label.map { Text($0) }
         self.description = Text(description)
     }
-
-    @available(*, deprecated, message: "Provide a stable id so SwiftUI can preserve feature identity.")
-    public init(image: Image? = nil, label: Text? = nil, description: Text) {
-        self.init(id: UUID().uuidString, image: image, label: label, description: description)
-    }
-
-    @available(*, deprecated, message: "Provide a stable id so SwiftUI can preserve feature identity.")
-    public init(
-        systemImage: String? = nil,
-        label: LocalizedStringResource? = nil,
-        description: LocalizedStringResource)
-    {
-        self.init(
-            id: UUID().uuidString,
-            systemImage: systemImage,
-            label: label,
-            description: description)
-    }
 }
 
-public struct GreetPrimaryRoute: Identifiable, Hashable {
+public struct GreetPrimaryRoute: Identifiable, Hashable, Sendable {
     public let id: String
 
     public init(id: String) {
@@ -61,6 +44,7 @@ public protocol GreetContent {
     var primaryRouteNextButtonText: Text { get }
     var primaryRouteDoneButtonText: Text { get }
     var primaryButtonText: Text { get }
+    var primaryButtonLoadingAccessibilityValue: Text { get }
     var skipButtonText: Text? { get }
     var errorAlertTitle: Text { get }
     var errorOKText: Text { get }
@@ -72,5 +56,7 @@ public extension GreetContent {
     var primaryRoutes: [GreetPrimaryRoute] { [] }
     var primaryRouteNextButtonText: Text { Text("Next") }
     var primaryRouteDoneButtonText: Text { Text("Done") }
+    var primaryButtonLoadingAccessibilityValue: Text { Text("Loading") }
     var skipButtonText: Text? { nil }
 }
+#endif

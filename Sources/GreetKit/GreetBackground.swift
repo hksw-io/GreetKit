@@ -2,7 +2,7 @@
 import Foundation
 import SwiftUI
 
-public struct GreetBackgroundContext {
+public struct GreetBackgroundContext: Sendable {
     public let reduceMotion: Bool
     public let brandColor: Color?
     public let colorScheme: ColorScheme
@@ -18,8 +18,8 @@ public struct GreetBackgroundContext {
     }
 }
 
-public struct GreetGradientPalette {
-    public struct Tones {
+public struct GreetGradientPalette: Sendable {
+    public struct Tones: Sendable {
         public var base: Color
         public var primary: Color
         public var secondary: Color
@@ -135,22 +135,6 @@ public struct GreetBackground {
         motion: GreetGradientMotion = .standard) -> Self
     {
         Self(storage: .animatedGradient(brand: brand, palette: palette, motion: motion))
-    }
-
-    @available(*, deprecated, message: "Use animatedGradient(brand:palette:motion:) instead.")
-    public static func animatedMesh(
-        primary: Color = .blue,
-        secondary: Color = .purple,
-        accent: Color = .mint) -> Self
-    {
-        self.animatedGradient(
-            palette: GreetGradientPalette(
-                light: .init(
-                    base: Tokens.background,
-                    primary: primary,
-                    secondary: secondary,
-                    accent: accent)),
-            motion: .standard)
     }
 
     public static func custom<Background: View>(

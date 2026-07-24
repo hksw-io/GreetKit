@@ -18,9 +18,7 @@ public struct GreetView<Content: GreetContent>: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var featuresVisible = false
     @State private var scrollEdgeFadeOpacity: Double = 1
-    @State private var activePrimaryDestination = false
-    @State private var activePrimaryRouteID: GreetPrimaryRoute.ID?
-    @State private var routeTransitionDirection: GreetRouteTransitionDirection = .forward
+    @State private var routeState = GreetRouteState()
     @State private var footerFrame: FooterMaskFrame = .zero
 
     @ScaledMetric(relativeTo: .largeTitle) private var iconSize: CGFloat = Tokens.Platform.iconSize
@@ -30,8 +28,6 @@ public struct GreetView<Content: GreetContent>: View {
     @ScaledMetric(relativeTo: .body) private var topPadding: CGFloat = Tokens.Platform.topPadding
     @ScaledMetric(relativeTo: .body) private var bottomPadding: CGFloat = Tokens.Platform.bottomPadding
     @ScaledMetric(relativeTo: .body) private var scrollEdgeFadeHeight: CGFloat = Tokens.Platform.scrollEdgeFadeHeight
-    @ScaledMetric(relativeTo: .body) private var compactHorizontalPadding: CGFloat = Tokens.Layout.compactHorizontalPadding
-    @ScaledMetric(relativeTo: .body) private var regularHorizontalPadding: CGFloat = Tokens.Layout.regularHorizontalPadding
 
     public init(
         content: Content,
@@ -135,23 +131,22 @@ public struct GreetView<Content: GreetContent>: View {
                 colorScheme: self.colorScheme)
 
             ZStack {
-                if let activePrimaryRoute = self.activePrimaryRoute,
+                if let activeRoute = self.routeState.activeRoute(in: self.content.primaryRoutes),
                    let primaryRouteDestination = self.primaryRouteDestination
                 {
                     GreetPrimaryRouteDestinationContainer(
                         content: self.content,
-                        background: self.background,
                         style: self.style,
-                        destination: primaryRouteDestination(activePrimaryRoute.route),
-                        index: activePrimaryRoute.index,
+                        destination: primaryRouteDestination(activeRoute.route),
+                        index: activeRoute.index,
                         count: self.content.primaryRoutes.count,
                         onNext: {
-                            self.openPrimaryRoute(after: activePrimaryRoute.index)
+                            self.routeState.advance(after: activeRoute.index, in: self.content.primaryRoutes)
                         },
                         onDone: self.completePrimaryRoutes)
-                        .id("primary-route-\(activePrimaryRoute.route.id)")
+                        .id("primary-route-\(activeRoute.route.id)")
                         .transition(self.routeTransition)
-                } else if self.activePrimaryDestination, let primaryDestination = self.primaryDestination {
+                } else if self.routeState.showsSingleDestination, let primaryDestination = self.primaryDestination {
                     GreetPrimaryDestinationContainer(
                         destination: primaryDestination())
                         .id("primary-destination")
@@ -170,7 +165,7 @@ public struct GreetView<Content: GreetContent>: View {
 
     private var greetOverview: some View {
         GeometryReader { geometry in
-            ScrollView(.vertical, showsIndicators: false) {
+            ScrollView(.vertical) {
                 VStack(spacing: self.contentSpacing) {
                     GreetHeaderSection(
                         content: self.content,
@@ -186,7 +181,7 @@ public struct GreetView<Content: GreetContent>: View {
                 }
                 .frame(maxWidth: Tokens.Layout.contentMaxWidth)
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, self.horizontalPadding(for: geometry.size.width))
+                .greetHorizontalPadding(containerWidth: geometry.size.width)
                 .padding(.top, self.topPadding)
                 .padding(
                     .bottom,
@@ -222,7 +217,7 @@ public struct GreetView<Content: GreetContent>: View {
                         onPrimary: self.performPrimaryAction,
                         onSkip: self.onSkip)
                         .frame(maxWidth: Tokens.Layout.contentMaxWidth)
-                        .padding(.horizontal, self.horizontalPadding(for: geometry.size.width))
+                        .greetHorizontalPadding(containerWidth: geometry.size.width)
                 }
                 .onGeometryChange(for: FooterMaskFrame.self) { geometry in
                     FooterMaskMetrics.quantizedFrame(
@@ -238,7 +233,9 @@ public struct GreetView<Content: GreetContent>: View {
             .coordinateSpace(.named(FooterMaskMetrics.coordinateSpaceName))
         }
         #if os(macOS)
-            .frame(minWidth: Tokens.Layout.compactSheetMinWidth, minHeight: 620)
+            .frame(
+                minWidth: Tokens.Layout.compactSheetMinWidth,
+                minHeight: Tokens.Layout.compactSheetMinHeight)
         #endif
             .onAppear {
                 self.featuresVisible = true
@@ -248,56 +245,15 @@ public struct GreetView<Content: GreetContent>: View {
     private func performPrimaryAction() {
         self.onPrimary()
 
-        if self.primaryRouteDestination != nil, !self.content.primaryRoutes.isEmpty {
-            self.routeTransitionDirection = .forward
-            withAnimation(self.routeAnimation) {
-                self.activePrimaryDestination = false
-                self.activePrimaryRouteID = self.content.primaryRoutes.first?.id
-            }
-            return
-        }
-
-        guard self.primaryDestination != nil else {
-            return
-        }
-
-        self.routeTransitionDirection = .forward
-        withAnimation(self.routeAnimation) {
-            self.activePrimaryDestination = true
-        }
-    }
-
-    private func openPrimaryRoute(after index: Int) {
-        let nextIndex = index + 1
-        guard self.content.primaryRoutes.indices.contains(nextIndex) else {
-            self.completePrimaryRoutes()
-            return
-        }
-
-        self.routeTransitionDirection = .forward
-        withAnimation(self.routeAnimation) {
-            self.activePrimaryRouteID = self.content.primaryRoutes[nextIndex].id
-        }
+        self.routeState.begin(
+            routes: self.content.primaryRoutes,
+            hasRouteDestination: self.primaryRouteDestination != nil,
+            hasSingleDestination: self.primaryDestination != nil)
     }
 
     private func completePrimaryRoutes() {
         self.onPrimaryRoutesComplete()
-        self.routeTransitionDirection = .backward
-        withAnimation(self.routeAnimation) {
-            self.activePrimaryRouteID = nil
-        }
-    }
-
-    private var activePrimaryRoute: (index: Int, route: GreetPrimaryRoute)? {
-        guard let activePrimaryRouteID else {
-            return nil
-        }
-
-        guard let index = self.content.primaryRoutes.firstIndex(where: { $0.id == activePrimaryRouteID }) else {
-            return nil
-        }
-
-        return (index, self.content.primaryRoutes[index])
+        self.routeState.complete()
     }
 
     private var routeTransition: AnyTransition {
@@ -305,7 +261,7 @@ public struct GreetView<Content: GreetContent>: View {
             return .opacity
         }
 
-        switch self.routeTransitionDirection {
+        switch self.routeState.transitionDirection {
         case .forward:
             return .asymmetric(
                 insertion: .move(edge: .trailing).combined(with: .opacity),
@@ -322,19 +278,7 @@ public struct GreetView<Content: GreetContent>: View {
     }
 
     private var primaryRoutePhaseID: String {
-        if let activePrimaryRouteID = self.activePrimaryRouteID {
-            return "route-\(activePrimaryRouteID)"
-        }
-
-        return self.activePrimaryDestination ? "single" : "overview"
-    }
-
-    private func horizontalPadding(for width: CGFloat) -> CGFloat {
-        LayoutMetrics.horizontalPadding(
-            for: width,
-            compact: self.compactHorizontalPadding,
-            regular: self.regularHorizontalPadding,
-            breakpoint: Tokens.Layout.compactWidthBreakpoint)
+        self.routeState.phaseID(in: self.content.primaryRoutes)
     }
 
     private var resolvedScrollEdgeFadeHeight: CGFloat {
@@ -509,11 +453,6 @@ private struct FooterContentMask: View {
     }
 }
 
-private enum GreetRouteTransitionDirection {
-    case forward
-    case backward
-}
-
 private struct GreetBackgroundView: View {
     let background: GreetBackground
     let reduceMotion: Bool
@@ -539,14 +478,15 @@ private struct GreetPrimaryDestinationContainer<Destination: View>: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         #if os(macOS)
-            .frame(minWidth: Tokens.Layout.compactSheetMinWidth, minHeight: 620)
+            .frame(
+                minWidth: Tokens.Layout.compactSheetMinWidth,
+                minHeight: Tokens.Layout.compactSheetMinHeight)
         #endif
     }
 }
 
 private struct GreetPrimaryRouteDestinationContainer<Content: GreetContent, Destination: View>: View {
     let content: Content
-    let background: GreetBackground
     let style: GreetStyle
     let destination: Destination
     let index: Int
@@ -554,44 +494,30 @@ private struct GreetPrimaryRouteDestinationContainer<Content: GreetContent, Dest
     let onNext: () -> Void
     let onDone: () -> Void
 
-    @ScaledMetric(relativeTo: .body) private var compactHorizontalPadding: CGFloat = Tokens.Layout.compactHorizontalPadding
-    @ScaledMetric(relativeTo: .body) private var regularHorizontalPadding: CGFloat = Tokens.Layout.regularHorizontalPadding
-
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 self.destination
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                Button {
-                    self.isLastRoute ? self.onDone() : self.onNext()
-                } label: {
-                    self.primaryButtonText
-                        .font(.body.weight(.semibold))
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .foregroundStyle(self.style.primaryButtonForegroundStyle)
-                        .frame(maxWidth: .infinity, minHeight: Tokens.Layout.buttonLabelMinHeight)
-                        .padding(.vertical, Tokens.Platform.buttonVerticalPadding)
-                        .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
-                }
-                .buttonStyle(.plain)
-                .controlSize(.extraLarge)
-                .background {
-                    RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous)
-                        .fill(self.style.primaryButtonBackgroundStyle)
-                }
-                .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
-                .frame(maxWidth: Tokens.Layout.contentMaxWidth)
-                .padding(.horizontal, self.horizontalPadding(for: geometry.size.width))
-                .padding(.top, Tokens.Layout.footerTopPadding)
-                .padding(.bottom, Tokens.Layout.footerBottomPadding)
-                .frame(maxWidth: .infinity)
+                GreetPrimaryButton(
+                    label: self.primaryButtonText,
+                    style: self.style,
+                    action: {
+                        self.isLastRoute ? self.onDone() : self.onNext()
+                    })
+                    .frame(maxWidth: Tokens.Layout.contentMaxWidth)
+                    .greetHorizontalPadding(containerWidth: geometry.size.width)
+                    .padding(.top, Tokens.Layout.footerTopPadding)
+                    .padding(.bottom, Tokens.Layout.footerBottomPadding)
+                    .frame(maxWidth: .infinity)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
         #if os(macOS)
-            .frame(minWidth: Tokens.Layout.compactSheetMinWidth, minHeight: 620)
+            .frame(
+                minWidth: Tokens.Layout.compactSheetMinWidth,
+                minHeight: Tokens.Layout.compactSheetMinHeight)
         #endif
     }
 
@@ -601,14 +527,6 @@ private struct GreetPrimaryRouteDestinationContainer<Content: GreetContent, Dest
 
     private var primaryButtonText: Text {
         self.isLastRoute ? self.content.primaryRouteDoneButtonText : self.content.primaryRouteNextButtonText
-    }
-
-    private func horizontalPadding(for width: CGFloat) -> CGFloat {
-        LayoutMetrics.horizontalPadding(
-            for: width,
-            compact: self.compactHorizontalPadding,
-            regular: self.regularHorizontalPadding,
-            breakpoint: Tokens.Layout.compactWidthBreakpoint)
     }
 }
 
@@ -726,6 +644,76 @@ private struct GreetFeatureRow: View {
     }
 }
 
+/// The pill-shaped primary action shared by the overview footer and the route destinations.
+///
+/// Pass `loading` only where the button can actually enter a loading state; route
+/// destinations leave it `nil` so no progress affordance is built at all.
+private struct GreetPrimaryButton: View {
+    struct Loading {
+        let isLoading: Bool
+        let accessibilityValue: Text
+    }
+
+    let label: Text
+    let style: GreetStyle
+    var loading: Loading?
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: self.action) {
+            self.labelContent
+                .frame(maxWidth: .infinity, minHeight: Tokens.Layout.buttonLabelMinHeight)
+                .padding(.vertical, Tokens.Platform.buttonVerticalPadding)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(self.label)
+                .greetAccessibilityValue(self.isLoading ? self.loading?.accessibilityValue : nil)
+                .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .controlSize(.extraLarge)
+        .disabled(self.isLoading)
+        .background {
+            RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous)
+                .fill(self.style.primaryButtonBackgroundStyle)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
+        .opacity(self.isLoading ? 0.65 : 1)
+    }
+
+    private var isLoading: Bool {
+        self.loading?.isLoading ?? false
+    }
+
+    @ViewBuilder
+    private var labelContent: some View {
+        if self.loading != nil {
+            ZStack {
+                self.styledLabel
+                    .opacity(self.isLoading ? 0 : 1)
+
+                HStack(spacing: Tokens.Spacing.small) {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(self.style.resolvedPrimaryButtonProgressTint)
+
+                    self.styledLabel
+                }
+                .opacity(self.isLoading ? 1 : 0)
+            }
+        } else {
+            self.styledLabel
+        }
+    }
+
+    private var styledLabel: some View {
+        self.label
+            .font(.body.weight(.semibold))
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .foregroundStyle(self.style.primaryButtonForegroundStyle)
+    }
+}
+
 private struct GreetFooterSection<Content: GreetContent>: View {
     let content: Content
     let isLoading: Bool
@@ -735,46 +723,13 @@ private struct GreetFooterSection<Content: GreetContent>: View {
 
     var body: some View {
         VStack(spacing: Tokens.Layout.footerControlSpacing) {
-            Button {
-                self.onPrimary()
-            } label: {
-                ZStack {
-                    self.content.primaryButtonText
-                        .font(.body.weight(.semibold))
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .foregroundStyle(self.style.primaryButtonForegroundStyle)
-                        .opacity(self.isLoading ? 0 : 1)
-
-                    HStack(spacing: Tokens.Spacing.small) {
-                        ProgressView()
-                            .controlSize(.small)
-                            .tint(self.style.resolvedPrimaryButtonProgressTint)
-
-                        self.content.primaryButtonText
-                            .font(.body.weight(.semibold))
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .foregroundStyle(self.style.primaryButtonForegroundStyle)
-                    }
-                    .opacity(self.isLoading ? 1 : 0)
-                }
-                .frame(maxWidth: .infinity, minHeight: Tokens.Layout.buttonLabelMinHeight)
-                .padding(.vertical, Tokens.Platform.buttonVerticalPadding)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(self.content.primaryButtonText)
-                .accessibilityValue(self.isLoading ? Text("Loading") : Text(""))
-                .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
-            }
-            .buttonStyle(.plain)
-            .controlSize(.extraLarge)
-            .disabled(self.isLoading)
-            .background {
-                RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous)
-                    .fill(self.style.primaryButtonBackgroundStyle)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
-            .opacity(self.isLoading ? 0.65 : 1)
+            GreetPrimaryButton(
+                label: self.content.primaryButtonText,
+                style: self.style,
+                loading: GreetPrimaryButton.Loading(
+                    isLoading: self.isLoading,
+                    accessibilityValue: self.content.primaryButtonLoadingAccessibilityValue),
+                action: self.onPrimary)
 
             if let skipText = self.content.skipButtonText {
                 Button {
@@ -788,6 +743,7 @@ private struct GreetFooterSection<Content: GreetContent>: View {
                             maxWidth: .infinity,
                             minHeight: Tokens.Layout.minimumControlHeight,
                             alignment: .top)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(self.style.secondaryButtonForegroundStyle)
@@ -799,7 +755,30 @@ private struct GreetFooterSection<Content: GreetContent>: View {
     }
 }
 
+/// Applies the compact or regular horizontal padding for a container width.
+///
+/// Lives in a modifier so the two `@ScaledMetric` values behind it are declared once.
+private struct GreetHorizontalPadding: ViewModifier {
+    let containerWidth: CGFloat
+
+    @ScaledMetric(relativeTo: .body) private var compactPadding: CGFloat = Tokens.Layout.compactHorizontalPadding
+    @ScaledMetric(relativeTo: .body) private var regularPadding: CGFloat = Tokens.Layout.regularHorizontalPadding
+
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, LayoutMetrics.horizontalPadding(
+                for: self.containerWidth,
+                compact: self.compactPadding,
+                regular: self.regularPadding,
+                breakpoint: Tokens.Layout.compactWidthBreakpoint))
+    }
+}
+
 private extension View {
+    func greetHorizontalPadding(containerWidth: CGFloat) -> some View {
+        self.modifier(GreetHorizontalPadding(containerWidth: containerWidth))
+    }
+
     @ViewBuilder
     func greetTint(_ color: Color?) -> some View {
         if let color {
@@ -813,6 +792,15 @@ private extension View {
     func greetOptionalForegroundStyle(_ color: Color?) -> some View {
         if let color {
             self.foregroundStyle(color)
+        } else {
+            self
+        }
+    }
+
+    @ViewBuilder
+    func greetAccessibilityValue(_ value: Text?) -> some View {
+        if let value {
+            self.accessibilityValue(value)
         } else {
             self
         }

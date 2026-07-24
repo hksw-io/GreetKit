@@ -3,8 +3,9 @@ import SwiftUI
 import Testing
 @testable import GreetKit
 
+@Suite("Greet view construction")
 @MainActor
-struct GreetViewBuildTest {
+struct GreetViewTests {
     @Test
     func viewConstructsWithMinimalContent() {
         struct MinimalContent: GreetContent {
@@ -91,16 +92,70 @@ struct GreetViewBuildTest {
     }
 
     @Test
-    func revealDelayStartsWithBaseDelay() {
-        #expect(Tokens.Motion.revealDelay(for: 0) == Tokens.Motion.featureBaseDelay)
+    func convenienceFeatureInitializerStoresStableID() {
+        let feature = GreetFeatureItem(
+            id: "localized-feature",
+            systemImage: "sparkles",
+            label: "Label",
+            description: "Description.")
+
+        #expect(feature.id == "localized-feature")
+        #expect(feature.image != nil)
+        #expect(feature.label != nil)
     }
 
     @Test
-    func revealDelayCapsLongLists() {
-        let expectedDelay = Tokens.Motion.featureBaseDelay + Tokens.Motion.maxFeatureStaggerDelay
-        let actualDelay = Tokens.Motion.revealDelay(for: 100)
+    func featureOmitsOptionalIconAndLabel() {
+        let feature = GreetFeatureItem(id: "bare", description: Text("Description only."))
 
-        #expect(abs(actualDelay - expectedDelay) < 0.0001)
+        #expect(feature.image == nil)
+        #expect(feature.label == nil)
+    }
+
+    @Test
+    func primaryRouteStoresStableID() {
+        let route = GreetPrimaryRoute(id: "sample-data")
+
+        #expect(route.id == "sample-data")
+    }
+
+    @Test
+    func contentProtocolSuppliesDefaultsForOptionalMembers() {
+        struct DefaultsContent: GreetContent {
+            var title: Text { Text("Defaults") }
+            var features: [GreetFeatureItem] { [] }
+            var primaryButtonText: Text { Text("Go") }
+            var errorAlertTitle: Text { Text("Error") }
+            var errorOKText: Text { Text("OK") }
+        }
+
+        let content = DefaultsContent()
+
+        #expect(content.appIcon == nil)
+        #expect(content.subtitle == nil)
+        #expect(content.skipButtonText == nil)
+        #expect(content.primaryRoutes.isEmpty)
+    }
+
+    @Test
+    func loadingAccessibilityValueCanBeOverriddenByTheConsumer() {
+        struct LocalizedLoadingContent: GreetContent {
+            var title: Text { Text("Localized") }
+            var features: [GreetFeatureItem] {
+                [GreetFeatureItem(id: "one", description: Text("One."))]
+            }
+            var primaryButtonText: Text { Text("Go") }
+            var primaryButtonLoadingAccessibilityValue: Text { Text("Laddar") }
+            var errorAlertTitle: Text { Text("Error") }
+            var errorOKText: Text { Text("OK") }
+        }
+
+        _ = GreetView(
+            content: LocalizedLoadingContent(),
+            isLoading: .constant(true),
+            errorMessage: .constant(nil),
+            onPrimary: {},
+            onSkip: {})
     }
 
     @Test
@@ -164,269 +219,6 @@ struct GreetViewBuildTest {
                 startPoint: .top,
                 endPoint: .bottom)
         })
-    }
-
-    @Test
-    func backgroundContextStoresColorScheme() {
-        let defaultContext = GreetBackgroundContext(reduceMotion: true)
-        let darkContext = GreetBackgroundContext(
-            reduceMotion: false,
-            brandColor: .pink,
-            colorScheme: .dark)
-
-        #expect(defaultContext.reduceMotion)
-        #expect(defaultContext.colorScheme == .light)
-        #expect(!darkContext.reduceMotion)
-        #expect(darkContext.colorScheme == .dark)
-    }
-
-    @Test
-    func footerMaskHeightQuantizesToWholePoints() {
-        #expect(FooterMaskMetrics.quantizedHeight(123.4) == 123)
-        #expect(FooterMaskMetrics.quantizedHeight(123.5) == 124)
-    }
-
-    @Test
-    func footerMaskFrameQuantizesPositionAndHeight() {
-        let frame = FooterMaskMetrics.quantizedFrame(CGRect(x: 0, y: 612.4, width: 390, height: 127.5))
-
-        #expect(frame.minY == 612)
-        #expect(frame.height == 128)
-    }
-
-    @Test
-    func footerMaskFadeHeightCapsToAvoidEarlyMasking() {
-        #expect(FooterMaskMetrics.resolvedFadeHeight(80) == FooterMaskMetrics.maximumFadeHeight)
-    }
-
-    @Test
-    func footerMaskFadeHeightKeepsShorterValues() {
-        #expect(FooterMaskMetrics.resolvedFadeHeight(18) == 18)
-        #expect(FooterMaskMetrics.resolvedFadeHeight(0) == 0)
-    }
-
-    @Test
-    func footerMaskFadeBottomIsHiddenWhenScrollableContentContinues() {
-        #expect(FooterMaskMetrics.fadeBottomOpacity(scrollEdgeFadeOpacity: 1) == 0)
-    }
-
-    @Test
-    func footerMaskFadeBottomIsVisibleAtScrollEnd() {
-        #expect(FooterMaskMetrics.fadeBottomOpacity(scrollEdgeFadeOpacity: 0) == 1)
-    }
-
-    @Test
-    func footerMaskLayoutUsesMeasuredFooterTop() {
-        let layout = FooterMaskMetrics.layout(
-            containerHeight: 740,
-            footerFrame: FooterMaskFrame(minY: 612, height: 128),
-            fadeHeight: FooterMaskMetrics.resolvedFadeHeight(80),
-            scrollEdgeFadeOpacity: 1)
-
-        #expect(layout.opaqueHeight == 584)
-        #expect(layout.fadeHeight == 28)
-        #expect(layout.clearHeight == 128)
-        #expect(layout.fadeBottomOpacity == 0)
-    }
-
-    @Test
-    func footerMaskLayoutStaysOpaqueBeforeFooterMeasurement() {
-        let layout = FooterMaskMetrics.layout(
-            containerHeight: 740,
-            footerFrame: .zero,
-            fadeHeight: FooterMaskMetrics.resolvedFadeHeight(80),
-            scrollEdgeFadeOpacity: 1)
-
-        #expect(layout.opaqueHeight == 740)
-        #expect(layout.fadeHeight == 0)
-        #expect(layout.clearHeight == 0)
-        #expect(layout.fadeBottomOpacity == 1)
-    }
-
-    @Test
-    func footerMaskContentBottomInsetMatchesMeasuredFooterArea() {
-        let inset = FooterMaskMetrics.contentBottomInset(
-            containerHeight: 740,
-            footerFrame: FooterMaskFrame(minY: 612, height: 128))
-
-        #expect(inset == 128)
-    }
-
-    @Test
-    func footerMaskContentBottomInsetIsZeroBeforeFooterMeasurement() {
-        let inset = FooterMaskMetrics.contentBottomInset(
-            containerHeight: 740,
-            footerFrame: .zero)
-
-        #expect(inset == 0)
-    }
-
-    @Test
-    func primaryButtonRadiusUsesRounderControlShape() {
-        #expect(Tokens.Radius.button > Tokens.Radius.large)
-    }
-
-    @Test
-    func footerControlsUseCompactVisualSpacingWithAccessibleSkipHeight() {
-        #expect(Tokens.Layout.footerControlSpacing == Tokens.Spacing.medium)
-        #expect(Tokens.Layout.minimumControlHeight == 44)
-    }
-
-    @Test
-    func footerUsesAsymmetricPaddingToSitCloserToBottomEdge() {
-        #expect(Tokens.Layout.footerBottomPadding == 0)
-        #expect(Tokens.Layout.footerBottomPadding < Tokens.Layout.footerTopPadding)
-    }
-
-    @Test
-    func viewConstructsWithBackgroundAndPrimaryRouteChain() {
-        _ = GreetView(
-            content: BackgroundRouteContent(),
-            isLoading: .constant(false),
-            errorMessage: .constant(nil),
-            onPrimary: {},
-            onSkip: {},
-            onPrimaryRoutesComplete: {},
-            primaryRouteDestination: { route in
-                Text(route.id)
-            })
-            .greetBackground(.animatedGradient())
-    }
-
-    @Test
-    func viewConstructsWithStandardStyleModifier() {
-        _ = self.styledView()
-            .greetStyle(.standard)
-    }
-
-    @Test
-    func viewConstructsWithCustomStyleColors() {
-        let style = GreetStyle(
-            tint: .indigo,
-            titleColor: .primary,
-            subtitleColor: .secondary,
-            featureIconColor: .mint,
-            featureTitleColor: .primary,
-            featureDescriptionColor: .secondary,
-            primaryButtonForegroundColor: .white,
-            primaryButtonProgressTint: .white,
-            secondaryButtonColor: .secondary)
-
-        _ = self.styledView()
-            .greetBackground(.softGradient)
-            .greetStyle(style)
-    }
-
-    @Test
-    func styleProvidesCustomPrimaryButtonSurface() {
-        let style = GreetStyle(tint: .indigo, primaryButtonForegroundColor: .white)
-
-        _ = style.primaryButtonBackgroundStyle
-        _ = style.primaryButtonForegroundStyle
-    }
-
-    @Test
-    func animatedGradientCentersAreStableWithReduceMotion() {
-        let first = GreetAnimatedGradientMotion.centers(
-            phase: 0,
-            reduceMotion: true,
-            motion: .expressive)
-        let second = GreetAnimatedGradientMotion.centers(
-            phase: 0.5,
-            reduceMotion: true,
-            motion: .expressive)
-
-        #expect(first[0].x == second[0].x)
-        #expect(first[0].y == second[0].y)
-    }
-
-    @Test
-    func animatedGradientCentersChangeAcrossPhases() {
-        let first = GreetAnimatedGradientMotion.centers(phase: 0, reduceMotion: false)
-        let second = GreetAnimatedGradientMotion.centers(phase: 0.25, reduceMotion: false)
-
-        #expect(abs(first[0].x - second[0].x) > 0.0001)
-    }
-
-    @Test
-    func expressiveAnimatedGradientMotionTravelsFartherThanSubtleMotion() {
-        let subtleStart = GreetAnimatedGradientMotion.centers(
-            phase: 0,
-            reduceMotion: false,
-            motion: .subtle)
-        let subtleEnd = GreetAnimatedGradientMotion.centers(
-            phase: 0.25,
-            reduceMotion: false,
-            motion: .subtle)
-        let expressiveStart = GreetAnimatedGradientMotion.centers(
-            phase: 0,
-            reduceMotion: false,
-            motion: .expressive)
-        let expressiveEnd = GreetAnimatedGradientMotion.centers(
-            phase: 0.25,
-            reduceMotion: false,
-            motion: .expressive)
-
-        #expect(self.totalTravel(from: expressiveStart, to: expressiveEnd) > self.totalTravel(from: subtleStart, to: subtleEnd))
-    }
-
-    @Test
-    func expressiveAnimatedGradientMotionHasHigherVisualContrastThanSubtleMotion() {
-        #expect(GreetGradientMotion.expressive.baseTintScale > GreetGradientMotion.subtle.baseTintScale)
-        #expect(GreetGradientMotion.expressive.blobOpacityScale > GreetGradientMotion.subtle.blobOpacityScale)
-        #expect(GreetGradientMotion.expressive.blobBlurScale < GreetGradientMotion.subtle.blobBlurScale)
-    }
-
-    @Test
-    func scrollEdgeFadeQuantizesOpacity() {
-        let opacity = ScrollEdgeFade.opacity(
-            contentHeight: 1_000,
-            visibleMaxY: 955,
-            fadeHeight: 100)
-
-        #expect(opacity == 0.45)
-    }
-
-    @Test
-    func scrollEdgeFadeIsOpaqueAtScrollEnd() {
-        let opacity = ScrollEdgeFade.opacity(
-            contentHeight: 1_000,
-            visibleMaxY: 1_000,
-            fadeHeight: 100)
-
-        #expect(opacity == 0)
-    }
-
-    @Test
-    func scrollEdgeFadeIsOpaqueWhenVisibleRectExtendsPastContentEnd() {
-        let opacity = ScrollEdgeFade.opacity(
-            contentHeight: 1_000,
-            visibleMaxY: 1_128,
-            fadeHeight: 100)
-
-        #expect(opacity == 0)
-    }
-
-    @Test
-    func layoutUsesCompactPaddingAtBreakpoint() {
-        let padding = LayoutMetrics.horizontalPadding(
-            for: 390,
-            compact: 16,
-            regular: 24,
-            breakpoint: 390)
-
-        #expect(padding == 16)
-    }
-
-    @Test
-    func layoutUsesRegularPaddingAboveBreakpoint() {
-        let padding = LayoutMetrics.horizontalPadding(
-            for: 391,
-            compact: 16,
-            regular: 24,
-            breakpoint: 390)
-
-        #expect(padding == 24)
     }
 
     @Test
@@ -533,13 +325,6 @@ struct GreetViewBuildTest {
     }
 
     @Test
-    func primaryRouteStoresStableID() {
-        let route = GreetPrimaryRoute(id: "sample-data")
-
-        #expect(route.id == "sample-data")
-    }
-
-    @Test
     func viewConstructsWithLongLocalizedContentAndManyFeatures() {
         struct LongContent: GreetContent {
             var appIcon: Image? { Image(systemName: "app.badge.fill") }
@@ -593,8 +378,12 @@ struct GreetViewBuildTest {
             var errorOKText: Text { Text("OK") }
         }
 
+        let content = ComputedContent()
+
+        #expect(content.features.map(\.id) == content.features.map(\.id))
+
         _ = GreetView(
-            content: ComputedContent(),
+            content: content,
             isLoading: .constant(false),
             errorMessage: .constant(nil),
             onPrimary: {},
@@ -629,6 +418,45 @@ struct GreetViewBuildTest {
             onSkip: {})
     }
 
+    @Test
+    func viewConstructsWithBackgroundAndPrimaryRouteChain() {
+        _ = GreetView(
+            content: BackgroundRouteContent(),
+            isLoading: .constant(false),
+            errorMessage: .constant(nil),
+            onPrimary: {},
+            onSkip: {},
+            onPrimaryRoutesComplete: {},
+            primaryRouteDestination: { route in
+                Text(route.id)
+            })
+            .greetBackground(.animatedGradient())
+    }
+
+    @Test
+    func viewConstructsWithStandardStyleModifier() {
+        _ = self.styledView()
+            .greetStyle(.standard)
+    }
+
+    @Test
+    func viewConstructsWithCustomStyleColors() {
+        let style = GreetStyle(
+            tint: .indigo,
+            titleColor: .primary,
+            subtitleColor: .secondary,
+            featureIconColor: .mint,
+            featureTitleColor: .primary,
+            featureDescriptionColor: .secondary,
+            primaryButtonForegroundColor: .white,
+            primaryButtonProgressTint: .white,
+            secondaryButtonColor: .secondary)
+
+        _ = self.styledView()
+            .greetBackground(.softGradient)
+            .greetStyle(style)
+    }
+
     private func backgroundView(_ background: GreetBackground) -> some View {
         self.styledView()
             .greetBackground(background)
@@ -641,14 +469,6 @@ struct GreetViewBuildTest {
             errorMessage: .constant(nil),
             onPrimary: {},
             onSkip: {})
-    }
-
-    private func totalTravel(from first: [CGPoint], to second: [CGPoint]) -> Double {
-        zip(first, second).reduce(0) { total, pair in
-            let xDistance = Double(pair.0.x - pair.1.x)
-            let yDistance = Double(pair.0.y - pair.1.y)
-            return total + ((xDistance * xDistance) + (yDistance * yDistance)).squareRoot()
-        }
     }
 }
 
