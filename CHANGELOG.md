@@ -23,6 +23,9 @@ All notable changes to GreetKit are recorded here. The format follows
   the platform supplies the pressed, hovered, focused, disabled, and Increase Contrast treatments
   it previously faked. On macOS the button now reacts to the pointer and takes a focus ring.
 
+- `GreetBackground.system` draws nothing instead of painting an opaque window or system background
+  colour full-bleed. Sheets carry their own material on both platforms, and covering it is what made
+  the default presentation look unlike a system sheet.
 - Motion splits by platform. `Tokens.Motion` was the only token group with no platform branch, so
   the Mac got the iPhone's 38pt staggered reveal and waited over a second for the last feature row
   to settle. macOS now uses a 12pt travel and roughly a third of the settle time; iOS is unchanged.

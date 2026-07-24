@@ -131,7 +131,7 @@ GreetView(
 
 Built-in options:
 
-- `.system` — the default platform background.
+- `.system` — the default. Draws nothing, so the presentation's own surface shows through: a sheet keeps the material the platform gives it.
 - `.softGradient` / `.softGradient(brand:palette:)` — a restrained brand-derived background tuned for readable first-run content.
 - `.linearGradient(colors:startPoint:endPoint:)` — app-provided colors with the library-managed footer treatment.
 - `.animatedGradient(brand:palette:motion:)` — an opt-in smooth full-surface animated gradient. It uses the style tint by default, adapts its tones for light and dark mode, and automatically becomes static when Reduce Motion is enabled.

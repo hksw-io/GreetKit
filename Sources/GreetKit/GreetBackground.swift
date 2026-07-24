@@ -151,7 +151,10 @@ extension GreetBackground {
     func makeView(context: GreetBackgroundContext) -> AnyView {
         switch self.storage {
         case .system:
-            AnyView(Tokens.background)
+            // Draw nothing. Sheets carry their own material on both platforms, and painting an
+            // opaque colour over it is what made the default presentation look unlike a system
+            // sheet. `Tokens.background` stays as the opaque base the gradients composite onto.
+            AnyView(EmptyView())
         case let .softGradient(brand, palette):
             AnyView(GreetSoftGradientBackground(
                 tones: GreetGradientPaletteResolver.tones(

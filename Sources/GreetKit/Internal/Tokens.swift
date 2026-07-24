@@ -79,9 +79,9 @@ enum Tokens {
 
     static var background: Color {
         #if os(macOS)
-            Color(nsColor: .windowBackgroundColor)
+            Color(.windowBackgroundColor)
         #else
-            Color(uiColor: .systemBackground)
+            Color(.systemBackground)
         #endif
     }
 }
