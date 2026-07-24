@@ -531,13 +531,21 @@ private struct GreetPrimaryButton: View {
 
     var body: some View {
         Button {
-            self.activationCount += 1
+            #if os(iOS)
+                // Only iOS reads this; mutating it elsewhere buys a render pass on every click
+                // for nothing.
+                self.activationCount += 1
+            #endif
             self.action()
         } label: {
             self.labelContent
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(self.label)
-                .greetAccessibilityValue(self.isLoading ? self.loading?.accessibilityValue : nil)
+                // Applied unconditionally. A `@ViewBuilder` branch here would swap the label's
+                // structural identity the instant `isLoading` flips — which is the instant of the
+                // click — so SwiftUI would tear down and rebuild the label subtree while the glass
+                // button was still animating its press. That reads as the button stuttering.
+                .accessibilityValue(self.accessibilityValue)
         }
         .greetPrimarySensoryFeedback(trigger: self.activationCount)
         .buttonStyle(.glassProminent)
@@ -550,6 +558,16 @@ private struct GreetPrimaryButton: View {
 
     private var isLoading: Bool {
         self.loading?.isLoading ?? false
+    }
+
+    /// Empty rather than absent when idle, so the modifier is always present and the label keeps
+    /// one identity across the loading flip.
+    private var accessibilityValue: Text {
+        guard self.isLoading, let loading = self.loading else {
+            return Text(verbatim: "")
+        }
+
+        return loading.accessibilityValue
     }
 
     /// Cross-fades the label and the progress indicator in place.
@@ -730,14 +748,6 @@ private extension View {
         }
     }
 
-    @ViewBuilder
-    func greetAccessibilityValue(_ value: Text?) -> some View {
-        if let value {
-            self.accessibilityValue(value)
-        } else {
-            self
-        }
-    }
 }
 
 private struct GreetPreviewContent: GreetContent {
