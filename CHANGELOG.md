@@ -13,6 +13,9 @@ All notable changes to GreetKit are recorded here. The format follows
   the platform supplies the pressed, hovered, focused, disabled, and Increase Contrast treatments
   it previously faked. On macOS the button now reacts to the pointer and takes a focus ring.
 
+- macOS shows the system scroll indicator again when the greet content overflows. Hiding it made a
+  Mac window unable to say there was more below, especially with a mouse and always-visible
+  scrollers. iOS still hides it.
 - The pinned footer now uses `safeAreaBar(edge:)` and the platform's scroll edge effect
   (`scrollEdgeEffectStyle(_:for:)`) instead of a measured mask, so overflowing content fades the way
   the OS fades it everywhere else. The overview and the route destinations no longer wrap themselves

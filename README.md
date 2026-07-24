@@ -129,7 +129,7 @@ Built-in options:
 
 Destination views can still draw their own backgrounds. If they do, that local destination background appears above the GreetKit background.
 
-Every background spans behind the pinned footer and button area, including `.system`. Scroll indicators are hidden on supported platforms so branded sheets do not show a macOS scrollbar over the content.
+Every background spans behind the pinned footer and button area, including `.system`. Scroll indicators are hidden on iOS, where a swipe and the scroll edge effect already say the content continues, and left to the system on macOS, where the scroller is how a window tells you there is more below.
 
 `GreetStyle.tint` is the default brand color for `.softGradient` and `.animatedGradient()`. Pass `brand:` when the background should use a different brand color from the controls, or pass a full palette when an app needs exact light and dark tones:
 

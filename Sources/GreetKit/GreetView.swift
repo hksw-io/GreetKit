@@ -158,7 +158,7 @@ public struct GreetView<Content: GreetContent>: View {
             .animation(self.routeAnimation, value: self.primaryRoutePhaseID)
         }
         .clipped()
-        .scrollIndicators(.never, axes: .vertical)
+        .greetScrollIndicators()
     }
 
     private var greetOverview: some View {
@@ -182,7 +182,7 @@ public struct GreetView<Content: GreetContent>: View {
             .padding(.top, self.topPadding)
             .padding(.bottom, self.bottomPadding)
         }
-        .scrollIndicators(.never, axes: .vertical)
+        .greetScrollIndicators()
         .scrollBounceBehavior(.basedOnSize)
         .safeAreaBar(edge: .bottom) {
             GreetFooterSection(
@@ -585,6 +585,18 @@ private struct GreetHorizontalPadding: ViewModifier {
 private extension View {
     func greetHorizontalPadding(containerWidth: CGFloat) -> some View {
         self.modifier(GreetHorizontalPadding(containerWidth: containerWidth))
+    }
+
+    /// Hides the scroll indicator on iOS, where the scroll edge effect and a swipe carry the
+    /// affordance, and keeps the system scroller on macOS, where it is how a window tells you
+    /// there is more below.
+    @ViewBuilder
+    func greetScrollIndicators() -> some View {
+        #if os(macOS)
+            self.scrollIndicators(.automatic, axes: .vertical)
+        #else
+            self.scrollIndicators(.never, axes: .vertical)
+        #endif
     }
 
     /// Publishes the receiver's width so `greetHorizontalPadding(containerWidth:)` can pick a
