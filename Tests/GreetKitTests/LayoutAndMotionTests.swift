@@ -60,18 +60,38 @@ struct LayoutAndMotionTests {
         #expect(padding == 24)
     }
 
-    /// The container width feeds `horizontalPadding(for:)` from an `onGeometryChange`
-    /// observer, so it starts at zero before the first layout pass and must land on the
-    /// compact padding rather than the regular one.
+    /// The container width arrives one layout pass late, from an `onGeometryChange` observer.
+    /// The seeded value has to pick the same padding the measured pass will, or the content
+    /// reflows and rewraps underneath the feature reveal.
     @Test
-    func layoutUsesCompactPaddingBeforeTheContainerIsMeasured() {
-        let padding = LayoutMetrics.horizontalPadding(
-            for: 0,
+    func assumedContainerWidthMatchesTheMeasuredPadding() {
+        let assumed = LayoutMetrics.horizontalPadding(
+            for: Tokens.Platform.assumedContainerWidth,
             compact: 16,
             regular: 24,
-            breakpoint: 390)
+            breakpoint: Tokens.Layout.compactWidthBreakpoint)
 
-        #expect(padding == 16)
+        #if os(macOS)
+            // Every Mac sheet is at least sheetMinWidth, which is past the breakpoint.
+            let measured = LayoutMetrics.horizontalPadding(
+                for: Tokens.Platform.sheetMinWidth,
+                compact: 16,
+                regular: 24,
+                breakpoint: Tokens.Layout.compactWidthBreakpoint)
+
+            #expect(assumed == 24)
+            #expect(assumed == measured)
+        #else
+            // A phone-width sheet sits at or under the breakpoint.
+            let measured = LayoutMetrics.horizontalPadding(
+                for: Tokens.Layout.compactWidthBreakpoint,
+                compact: 16,
+                regular: 24,
+                breakpoint: Tokens.Layout.compactWidthBreakpoint)
+
+            #expect(assumed == 16)
+            #expect(assumed == measured)
+        #endif
     }
 
     @Test

@@ -64,6 +64,10 @@ enum Tokens {
             static let sheetMinHeight: CGFloat = 420
             static let sheetIdealWidth: CGFloat = 560
             static let sheetIdealHeight: CGFloat = 520
+            /// What to assume before the container reports its width, so the first layout pass
+            /// already picks the padding the measured pass will confirm. A Mac sheet is never
+            /// narrower than `sheetMinWidth`, which is past the compact breakpoint.
+            static let assumedContainerWidth: CGFloat = sheetIdealWidth
             /// A pointer target, not a touch target.
             static let minimumControlHeight: CGFloat = 28
         #else
@@ -74,6 +78,9 @@ enum Tokens {
             static let topPadding: CGFloat = 32
             static let bottomPadding: CGFloat = 24
             static let minimumControlHeight: CGFloat = 44
+            /// Phone width, which is what a sheet is on the overwhelming majority of iOS
+            /// presentations. iPad still corrects itself on the measured pass.
+            static let assumedContainerWidth: CGFloat = 0
         #endif
     }
 

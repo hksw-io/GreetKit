@@ -20,7 +20,7 @@ public struct GreetView<Content: GreetContent>: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var featuresVisible = false
     @State private var routeState = GreetRouteState()
-    @State private var containerWidth: CGFloat = 0
+    @State private var containerWidth: CGFloat = Tokens.Platform.assumedContainerWidth
 
     @ScaledMetric(relativeTo: .largeTitle) private var iconSize: CGFloat = Tokens.Platform.iconSize
     @ScaledMetric(relativeTo: .body) private var featureIconSize: CGFloat = Tokens.Platform.featureIconSize
@@ -330,7 +330,7 @@ private struct GreetPrimaryRouteDestinationContainer<Content: GreetContent, Dest
     let onNext: () -> Void
     let onDone: () -> Void
 
-    @State private var containerWidth: CGFloat = 0
+    @State private var containerWidth: CGFloat = Tokens.Platform.assumedContainerWidth
 
     var body: some View {
         self.destination
