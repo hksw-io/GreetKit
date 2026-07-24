@@ -8,6 +8,10 @@ All notable changes to GreetKit are recorded here. The format follows
 
 ### Added
 
+- **Breaking.** `GreetBackgroundContext` gains `reduceTransparency` and `colorSchemeContrast`, both
+  defaulted, so custom backgrounds can react to them. The built-in gradients now do: under either
+  setting the color wash is damped and more of the opaque base shows, so foreground contrast stops
+  depending on where a gradient blob lands.
 - Keyboard support. Return triggers the primary action — including Next and Done inside a route
   chain — and Escape triggers the skip action, but only when `skipButtonText` is non-nil and
   `allowsInteractiveDismissal` is `true`. A blocking setup flow stays blocked, and Escape never

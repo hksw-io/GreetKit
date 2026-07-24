@@ -15,6 +15,8 @@ public struct GreetView<Content: GreetContent>: View {
     let onPrimaryRoutesComplete: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
     @Environment(\.colorScheme) private var colorScheme
     @State private var featuresVisible = false
     @State private var routeState = GreetRouteState()
@@ -125,6 +127,8 @@ public struct GreetView<Content: GreetContent>: View {
             GreetBackgroundView(
                 background: self.background,
                 reduceMotion: self.reduceMotion,
+                reduceTransparency: self.reduceTransparency,
+                colorSchemeContrast: self.colorSchemeContrast,
                 brandColor: self.style.tint,
                 colorScheme: self.colorScheme)
 
@@ -282,6 +286,8 @@ enum LayoutMetrics {
 private struct GreetBackgroundView: View {
     let background: GreetBackground
     let reduceMotion: Bool
+    let reduceTransparency: Bool
+    let colorSchemeContrast: ColorSchemeContrast
     let brandColor: Color?
     let colorScheme: ColorScheme
 
@@ -289,6 +295,8 @@ private struct GreetBackgroundView: View {
         self.background
             .makeView(context: GreetBackgroundContext(
                 reduceMotion: self.reduceMotion,
+                reduceTransparency: self.reduceTransparency,
+                colorSchemeContrast: self.colorSchemeContrast,
                 brandColor: self.brandColor,
                 colorScheme: self.colorScheme))
             .ignoresSafeArea()

@@ -20,6 +20,64 @@ struct GradientTests {
     }
 
     @Test
+    func backgroundContextDefaultsToStandardAccessibilitySettings() {
+        let context = GreetBackgroundContext(reduceMotion: false)
+
+        #expect(!context.reduceTransparency)
+        #expect(context.colorSchemeContrast == .standard)
+        #expect(!context.gradientAccessibility.prefersFlatBackground)
+    }
+
+    @Test
+    func backgroundContextFlagsEitherAccessibilitySetting() {
+        let transparency = GreetBackgroundContext(reduceMotion: false, reduceTransparency: true)
+        let contrast = GreetBackgroundContext(reduceMotion: false, colorSchemeContrast: .increased)
+
+        #expect(transparency.gradientAccessibility.prefersFlatBackground)
+        #expect(contrast.gradientAccessibility.prefersFlatBackground)
+    }
+
+    /// Both settings mean the same thing for a decorative wash: less colour, more of the opaque
+    /// base, so foreground contrast stops depending on where a blob happens to sit.
+    @Test
+    func softGradientDampsItsWashWhenAFlatBackgroundIsPreferred() {
+        let standard = GreetGradientVisualTuning.soft(colorScheme: .light)
+        let damped = standard.damped(for: GreetGradientAccessibility(
+            reduceTransparency: true,
+            increaseContrast: false))
+
+        #expect(damped.primaryOpacity < standard.primaryOpacity)
+        #expect(damped.secondaryOpacity < standard.secondaryOpacity)
+        #expect(damped.accentOpacity < standard.accentOpacity)
+        #expect(damped.baseTintOpacity < standard.baseTintOpacity)
+        #expect(damped.topVeilOpacity > standard.topVeilOpacity)
+        #expect(damped.bottomVeilOpacity > standard.bottomVeilOpacity)
+        #expect(damped.bottomVeilOpacity <= 1)
+    }
+
+    @Test
+    func animatedGradientDampsItsBlobsWhenAFlatBackgroundIsPreferred() {
+        let standard = GreetGradientVisualTuning.animated(colorScheme: .dark)
+        let damped = standard.damped(for: GreetGradientAccessibility(
+            reduceTransparency: false,
+            increaseContrast: true))
+
+        #expect(damped.primaryBlobOpacity < standard.primaryBlobOpacity)
+        #expect(damped.trailingBlobOpacity < standard.trailingBlobOpacity)
+        #expect(damped.topVeilOpacity > standard.topVeilOpacity)
+        #expect(damped.blobBlurRatio == standard.blobBlurRatio)
+    }
+
+    @Test
+    func tuningIsUntouchedWithStandardAccessibilitySettings() {
+        let soft = GreetGradientVisualTuning.soft(colorScheme: .light)
+        let animated = GreetGradientVisualTuning.animated(colorScheme: .light)
+
+        #expect(soft.damped(for: .standard).primaryOpacity == soft.primaryOpacity)
+        #expect(animated.damped(for: .standard).primaryBlobOpacity == animated.primaryBlobOpacity)
+    }
+
+    @Test
     func paletteReusesLightTonesWhenDarkIsOmitted() {
         let palette = GreetGradientPalette(
             light: .init(base: .white, primary: .pink, secondary: .orange, accent: .yellow))

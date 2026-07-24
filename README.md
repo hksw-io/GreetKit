@@ -135,7 +135,7 @@ Built-in options:
 - `.softGradient` / `.softGradient(brand:palette:)` — a restrained brand-derived background tuned for readable first-run content.
 - `.linearGradient(colors:startPoint:endPoint:)` — app-provided colors with the library-managed footer treatment.
 - `.animatedGradient(brand:palette:motion:)` — an opt-in smooth full-surface animated gradient. It uses the style tint by default, adapts its tones for light and dark mode, and automatically becomes static when Reduce Motion is enabled.
-- `.custom { context in ... }` — a fully custom SwiftUI background. Use `context.reduceMotion`, `context.brandColor`, and `context.colorScheme` to keep custom backgrounds consistent and accessible.
+- `.custom { context in ... }` — a fully custom SwiftUI background. Use `context.reduceMotion`, `context.reduceTransparency`, `context.colorSchemeContrast`, `context.brandColor`, and `context.colorScheme` to keep custom backgrounds consistent and accessible.
 
 Destination views can still draw their own backgrounds. If they do, that local destination background appears above the GreetKit background.
 
@@ -232,6 +232,8 @@ var primaryButtonLoadingAccessibilityValue: Text {
 ```
 
 Feature icons and the app icon are hidden from VoiceOver; feature labels carry the header trait and read separately from their descriptions. Reduce Motion removes the feature reveal animation, the route slide transitions, and the animated gradient's movement.
+
+The built-in gradient backgrounds flatten themselves under Reduce Transparency or Increase Contrast: the color wash is damped and more of the opaque base shows, so text contrast no longer depends on where a gradient blob happens to sit. Custom backgrounds get the same signals through `GreetBackgroundContext`.
 
 Return triggers the primary action, including Next and Done inside a route chain. Escape triggers the skip action, but only when `skipButtonText` is non-nil and `allowsInteractiveDismissal` is `true` — a blocking setup flow stays blocked, and Escape never fires `onSkip` when there is no skip button on screen.
 

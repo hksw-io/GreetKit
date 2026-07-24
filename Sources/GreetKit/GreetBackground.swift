@@ -4,17 +4,52 @@ import SwiftUI
 
 public struct GreetBackgroundContext: Sendable {
     public let reduceMotion: Bool
+    public let reduceTransparency: Bool
+    public let colorSchemeContrast: ColorSchemeContrast
     public let brandColor: Color?
     public let colorScheme: ColorScheme
 
     public init(
         reduceMotion: Bool,
+        reduceTransparency: Bool = false,
+        colorSchemeContrast: ColorSchemeContrast = .standard,
         brandColor: Color? = nil,
         colorScheme: ColorScheme = .light)
     {
         self.reduceMotion = reduceMotion
+        self.reduceTransparency = reduceTransparency
+        self.colorSchemeContrast = colorSchemeContrast
         self.brandColor = brandColor
         self.colorScheme = colorScheme
+    }
+}
+
+extension GreetBackgroundContext {
+    var gradientAccessibility: GreetGradientAccessibility {
+        GreetGradientAccessibility(
+            reduceTransparency: self.reduceTransparency,
+            increaseContrast: self.colorSchemeContrast == .increased)
+    }
+}
+
+/// Whether the person has asked for a background that competes less with the text on top of it.
+///
+/// Reduce Transparency and Increase Contrast both mean the same thing for a decorative colour
+/// wash: damp it, and let the opaque base carry more of the surface, so foreground contrast stops
+/// depending on where a blob happens to sit.
+struct GreetGradientAccessibility: Equatable, Sendable {
+    static let standard = Self(reduceTransparency: false, increaseContrast: false)
+
+    /// How much of the coloured wash survives when a flatter background is requested.
+    static let tintScale: Double = 0.3
+    /// How much more of the opaque base is pulled over the wash.
+    static let veilBoost: Double = 0.25
+
+    let reduceTransparency: Bool
+    let increaseContrast: Bool
+
+    var prefersFlatBackground: Bool {
+        self.reduceTransparency || self.increaseContrast
     }
 }
 
@@ -161,7 +196,8 @@ extension GreetBackground {
                     brand: brand,
                     palette: palette,
                     context: context),
-                colorScheme: context.colorScheme))
+                colorScheme: context.colorScheme,
+                accessibility: context.gradientAccessibility))
         case let .linearGradient(colors, startPoint, endPoint):
             AnyView(GreetLinearGradientBackground(
                 colors: colors,
@@ -175,7 +211,8 @@ extension GreetBackground {
                     context: context),
                 colorScheme: context.colorScheme,
                 motion: motion,
-                reduceMotion: context.reduceMotion))
+                reduceMotion: context.reduceMotion,
+                accessibility: context.gradientAccessibility))
         case let .custom(background):
             background(context)
         }
@@ -185,9 +222,12 @@ extension GreetBackground {
 private struct GreetSoftGradientBackground: View {
     let tones: GreetGradientPalette.Tones
     let colorScheme: ColorScheme
+    let accessibility: GreetGradientAccessibility
 
     var body: some View {
-        let tuning = GreetGradientVisualTuning.soft(colorScheme: self.colorScheme)
+        let tuning = GreetGradientVisualTuning
+            .soft(colorScheme: self.colorScheme)
+            .damped(for: self.accessibility)
 
         ZStack {
             self.tones.base
@@ -240,6 +280,7 @@ private struct GreetAnimatedGradientBackground: View {
     let colorScheme: ColorScheme
     let motion: GreetGradientMotion
     let reduceMotion: Bool
+    let accessibility: GreetGradientAccessibility
 
     private static let baseCycleDuration: TimeInterval = 10
 
@@ -259,6 +300,7 @@ private struct GreetAnimatedGradientBackground: View {
                 let tuning = GreetGradientVisualTuning
                     .animated(colorScheme: self.colorScheme)
                     .scaled(for: self.motion)
+                    .damped(for: self.accessibility)
 
                 Canvas(
                     opaque: true,
@@ -388,7 +430,7 @@ private enum GreetGradientPaletteResolver {
     }
 }
 
-private struct GreetSoftGradientTuning {
+struct GreetSoftGradientTuning {
     let baseTintOpacity: Double
     let primaryOpacity: Double
     let secondaryOpacity: Double
@@ -396,9 +438,27 @@ private struct GreetSoftGradientTuning {
     let baseFadeOpacity: Double
     let topVeilOpacity: Double
     let bottomVeilOpacity: Double
+
+    func damped(for accessibility: GreetGradientAccessibility) -> Self {
+        guard accessibility.prefersFlatBackground else {
+            return self
+        }
+
+        let scale = GreetGradientAccessibility.tintScale
+        let boost = GreetGradientAccessibility.veilBoost
+
+        return Self(
+            baseTintOpacity: self.baseTintOpacity * scale,
+            primaryOpacity: self.primaryOpacity * scale,
+            secondaryOpacity: self.secondaryOpacity * scale,
+            accentOpacity: self.accentOpacity * scale,
+            baseFadeOpacity: min(1, self.baseFadeOpacity + boost),
+            topVeilOpacity: min(1, self.topVeilOpacity + boost),
+            bottomVeilOpacity: min(1, self.bottomVeilOpacity + boost))
+    }
 }
 
-private struct GreetAnimatedGradientTuning {
+struct GreetAnimatedGradientTuning {
     let baseTintOpacity: Double
     let primaryBlobOpacity: Double
     let secondaryBlobOpacity: Double
@@ -419,9 +479,28 @@ private struct GreetAnimatedGradientTuning {
             bottomVeilOpacity: self.bottomVeilOpacity,
             blobBlurRatio: self.blobBlurRatio * motion.blobBlurScale)
     }
+
+    func damped(for accessibility: GreetGradientAccessibility) -> Self {
+        guard accessibility.prefersFlatBackground else {
+            return self
+        }
+
+        let scale = GreetGradientAccessibility.tintScale
+        let boost = GreetGradientAccessibility.veilBoost
+
+        return Self(
+            baseTintOpacity: self.baseTintOpacity * scale,
+            primaryBlobOpacity: self.primaryBlobOpacity * scale,
+            secondaryBlobOpacity: self.secondaryBlobOpacity * scale,
+            accentBlobOpacity: self.accentBlobOpacity * scale,
+            trailingBlobOpacity: self.trailingBlobOpacity * scale,
+            topVeilOpacity: min(1, self.topVeilOpacity + boost),
+            bottomVeilOpacity: min(1, self.bottomVeilOpacity + boost),
+            blobBlurRatio: self.blobBlurRatio)
+    }
 }
 
-private enum GreetGradientVisualTuning {
+enum GreetGradientVisualTuning {
     static func soft(colorScheme: ColorScheme) -> GreetSoftGradientTuning {
         if colorScheme == .dark {
             return GreetSoftGradientTuning(
