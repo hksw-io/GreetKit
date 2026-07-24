@@ -552,6 +552,13 @@ private struct GreetPrimaryButton: View {
         self.loading?.isLoading ?? false
     }
 
+    /// Cross-fades the label and the progress indicator in place.
+    ///
+    /// The loading state used to lay out a second copy of the label in an `HStack` beside the
+    /// spinner. Centring that pair put the text roughly half a spinner-width to the trailing side
+    /// of where the plain label sat, so starting to load slid the text sideways while two copies
+    /// of it cross-faded through each other — under a glass material that reads as the button
+    /// wobbling. One label, one position, and the `ZStack` keeps the button's size constant.
     @ViewBuilder
     private var labelContent: some View {
         if self.loading != nil {
@@ -559,13 +566,9 @@ private struct GreetPrimaryButton: View {
                 self.styledLabel
                     .opacity(self.isLoading ? 0 : 1)
 
-                HStack(spacing: Tokens.Spacing.small) {
-                    ProgressView()
-                        .controlSize(.small)
-
-                    self.styledLabel
-                }
-                .opacity(self.isLoading ? 1 : 0)
+                ProgressView()
+                    .controlSize(.small)
+                    .opacity(self.isLoading ? 1 : 0)
             }
         } else {
             self.styledLabel

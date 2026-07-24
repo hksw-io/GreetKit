@@ -43,6 +43,11 @@ All notable changes to GreetKit are recorded here. The format follows
 
 ### Fixed
 
+- The primary button no longer shifts its label when loading starts. The loading state laid out a
+  second copy of the label beside the spinner, and centring that pair moved the text sideways while
+  two copies cross-faded through each other — under a glass material that read as the button
+  wobbling. The label and the spinner now cross-fade in place. The label is hidden while loading;
+  `primaryButtonLoadingAccessibilityValue` still announces the state to VoiceOver.
 - The feature reveal stopped cascading after the fourth row. `maxFeatureStaggerDelay` capped the
   stagger so early that every row past the cap started on the same frame, so a longer feature list
   faded in as a block instead of revealing top to bottom. Around eight rows now get their own start
