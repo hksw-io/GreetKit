@@ -202,7 +202,7 @@ public struct GreetView<Content: GreetContent>: View {
                 .greetHorizontalPadding(containerWidth: self.containerWidth)
                 .frame(maxWidth: .infinity)
         }
-        .scrollEdgeEffectStyle(.soft, for: .bottom)
+        .scrollEdgeEffectStyle(.hard, for: .bottom)
         .greetContainerWidth(self.$containerWidth)
         #if os(macOS)
             .frame(
