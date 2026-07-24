@@ -3,7 +3,7 @@ import SwiftUI
 import Testing
 @testable import GreetKit
 
-@Suite("Layout, scroll fade, and motion")
+@Suite("Layout and motion")
 struct LayoutAndMotionTests {
     @Test
     func revealDelayStartsWithBaseDelay() {
@@ -45,47 +45,18 @@ struct LayoutAndMotionTests {
         #expect(padding == 24)
     }
 
+    /// The container width feeds `horizontalPadding(for:)` from an `onGeometryChange`
+    /// observer, so it starts at zero before the first layout pass and must land on the
+    /// compact padding rather than the regular one.
     @Test
-    func scrollEdgeFadeQuantizesOpacity() {
-        let opacity = ScrollEdgeFade.opacity(
-            contentHeight: 1_000,
-            visibleMaxY: 955,
-            fadeHeight: 100)
+    func layoutUsesCompactPaddingBeforeTheContainerIsMeasured() {
+        let padding = LayoutMetrics.horizontalPadding(
+            for: 0,
+            compact: 16,
+            regular: 24,
+            breakpoint: 390)
 
-        #expect(opacity == 0.45)
-    }
-
-    @Test
-    func scrollEdgeFadeIsOpaqueAtScrollEnd() {
-        let opacity = ScrollEdgeFade.opacity(
-            contentHeight: 1_000,
-            visibleMaxY: 1_000,
-            fadeHeight: 100)
-
-        #expect(opacity == 0)
-    }
-
-    @Test
-    func scrollEdgeFadeIsOpaqueWhenVisibleRectExtendsPastContentEnd() {
-        let opacity = ScrollEdgeFade.opacity(
-            contentHeight: 1_000,
-            visibleMaxY: 1_128,
-            fadeHeight: 100)
-
-        #expect(opacity == 0)
-    }
-
-    @Test
-    func scrollEdgeFadeIsFullyMaskedBeforeMeasurement() {
-        #expect(ScrollEdgeFade.opacity(contentHeight: 0, visibleMaxY: 0, fadeHeight: 100) == 1)
-        #expect(ScrollEdgeFade.opacity(contentHeight: 1_000, visibleMaxY: 0, fadeHeight: 0) == 1)
-    }
-
-    @Test
-    func scrollEdgeFadeQuantizesToTheGivenStep() {
-        #expect(ScrollEdgeFade.quantize(0.43) == 0.45)
-        #expect(ScrollEdgeFade.quantize(0.43, step: 0.25) == 0.5)
-        #expect(ScrollEdgeFade.quantize(0.43, step: 0) == 0.43)
+        #expect(padding == 16)
     }
 
     @Test

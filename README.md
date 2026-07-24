@@ -169,7 +169,7 @@ GreetView(
 
 The built-in presets are `.subtle`, `.standard`, and `.expressive`. Stronger motion increases movement, speed, and gradient contrast. For finer control, pass `GreetGradientMotion(strength:)`; values are clamped from `0` to `2`, and `0` keeps the animated-gradient color field static.
 
-GreetKit keeps the footer pinned while content scrolls behind it. A measured footer mask fades overflowing content only above the footer; when scrolling reaches the end, visible content is fully opaque again.
+GreetKit pins the footer with `safeAreaBar(edge:)` and hands the fade over overflowing content to the platform's scroll edge effect, so the treatment matches whatever the OS does elsewhere.
 
 ## Styling
 

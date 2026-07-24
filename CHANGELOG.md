@@ -13,6 +13,11 @@ All notable changes to GreetKit are recorded here. The format follows
   the platform supplies the pressed, hovered, focused, disabled, and Increase Contrast treatments
   it previously faked. On macOS the button now reacts to the pointer and takes a focus ring.
 
+- The pinned footer now uses `safeAreaBar(edge:)` and the platform's scroll edge effect
+  (`scrollEdgeEffectStyle(_:for:)`) instead of a measured mask, so overflowing content fades the way
+  the OS fades it everywhere else. The overview and the route destinations no longer wrap themselves
+  in a `GeometryReader`.
+
 ### Removed
 
 - **Breaking.** `GreetStyle.primaryButtonProgressTint`. The in-button progress view now inherits a
