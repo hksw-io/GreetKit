@@ -30,21 +30,27 @@ enum Tokens {
             // A Mac sheet travels less than a phone one — 14pt rather than 38 — but it still
             // reveals at a readable pace.
             //
-            // The first row arrives almost immediately: a long wait before anything happens reads
-            // as the sheet being slow to draw, not as choreography. The cascade earns its pace
-            // from the gap *between* rows instead, which is why the stagger is longer than the
-            // base delay. Each row also fades over a generous duration, so a row is still
-            // arriving as the next one starts.
-            static let featureBaseDelay: Double = 0.12
-            static let featureStaggerDelay: Double = 0.16
-            static let maxFeatureStaggerDelay: Double = 0.8
-            static let revealDuration: Double = 0.6
-            static let revealOffset: CGFloat = 14
+            // The first row arrives essentially at once: a wait before anything happens reads as
+            // the sheet being slow to draw, not as choreography.
+            //
+            // Three things make the cascade read as a stagger rather than a fade. The gap between
+            // rows is a large fraction of the fade duration, so each arrival is distinct instead
+            // of smeared into its neighbours. The cap is high enough that around eight rows get
+            // their own start time — capping early makes every row past it fire at once, which is
+            // precisely what turns a stagger back into a fade. And the travel is far enough to be
+            // seen as movement; a row that only fades has nothing to stagger visually.
+            static let featureBaseDelay: Double = 0.04
+            static let featureStaggerDelay: Double = 0.18
+            static let maxFeatureStaggerDelay: Double = 1.44
+            static let revealDuration: Double = 0.45
+            static let revealOffset: CGFloat = 20
             static let routeTransitionDuration: Double = 0.26
         #else
             static let featureBaseDelay: Double = 0.3
             static let featureStaggerDelay: Double = 0.17
-            static let maxFeatureStaggerDelay: Double = 0.68
+            // Eight rows deep rather than four. At four, every row past the fourth started at the
+            // same instant, so a long feature list stopped cascading and just faded in.
+            static let maxFeatureStaggerDelay: Double = 1.19
             static let revealDuration: Double = 0.48
             static let revealOffset: CGFloat = 38
             static let routeTransitionDuration: Double = 0.32

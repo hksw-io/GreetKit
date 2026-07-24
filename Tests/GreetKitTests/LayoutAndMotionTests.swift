@@ -32,19 +32,27 @@ struct LayoutAndMotionTests {
 
         #expect(lastRowSettles > 1)
         #expect(Tokens.Motion.revealDuration >= 0.45)
-        // A stagger under ~0.08s per row stops reading as a cascade.
-        #expect(Tokens.Motion.featureStaggerDelay >= 0.08)
+
+        // The gap between rows has to be a real fraction of the fade, or each arrival smears into
+        // its neighbours and the cascade reads as one fade rather than a stagger.
+        #expect(Tokens.Motion.featureStaggerDelay >= Tokens.Motion.revealDuration * 0.3)
+
+        // And the cap has to let enough rows have their own start time. Capping early makes every
+        // row past the cap fire on the same frame, which is the same failure by another route.
+        let distinctlyStaggeredRows =
+            Tokens.Motion.maxFeatureStaggerDelay / Tokens.Motion.featureStaggerDelay
+        #expect(distinctlyStaggeredRows >= 6)
 
         #if os(macOS)
-            #expect(Tokens.Motion.revealOffset == 14)
-            #expect(lastRowSettles < 1.7)
-            // The first row arrives promptly — a long wait before anything happens reads as the
-            // sheet being slow to draw. The pace comes from the gap between rows instead.
-            #expect(Tokens.Motion.featureBaseDelay <= 0.15)
+            #expect(Tokens.Motion.revealOffset == 20)
+            #expect(lastRowSettles < 2.1)
+            // The first row arrives promptly — a wait before anything happens reads as the sheet
+            // being slow to draw. The pace comes from the gap between rows instead.
+            #expect(Tokens.Motion.featureBaseDelay <= 0.1)
             #expect(Tokens.Motion.featureStaggerDelay > Tokens.Motion.featureBaseDelay)
         #else
             #expect(Tokens.Motion.revealOffset == 38)
-            #expect(lastRowSettles < 1.6)
+            #expect(lastRowSettles < 2.1)
         #endif
     }
 
