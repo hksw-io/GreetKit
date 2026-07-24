@@ -37,8 +37,9 @@ All notable changes to GreetKit are recorded here. The format follows
   colour full-bleed. Sheets carry their own material on both platforms, and covering it is what made
   the default presentation look unlike a system sheet.
 - Motion splits by platform. `Tokens.Motion` was the only token group with no platform branch, so
-  the Mac got the iPhone's 38pt staggered reveal and waited over a second for the last feature row
-  to settle. macOS now uses a 12pt travel and roughly a third of the settle time; iOS is unchanged.
+  the Mac got the iPhone's 38pt staggered reveal. macOS now travels 14pt instead, and waits for the
+  sheet's own presentation animation to land before starting. Both platforms keep a deliberate
+  ~1 second cascade — the stagger is what makes it read as a reveal rather than a flicker.
 - The route transition uses a spring (`.smooth`) and the built-in `.push(from:)` rather than
   `.easeInOut` over a hand-built asymmetric move-and-fade. The feature reveal keeps its ease-out
   curve: it is a one-shot entrance nothing can interrupt, and a spring's tail reads as the row

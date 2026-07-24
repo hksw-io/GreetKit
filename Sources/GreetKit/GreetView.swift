@@ -484,8 +484,10 @@ private struct GreetFeatureRow: View {
         // jumping and shaking before it landed. The body form animates only what it wraps, so
         // layout that settles underneath applies instantly and invisibly.
         //
-        // An ease-out curve, not a spring: this is a one-shot entrance nothing can interrupt, and
-        // a spring's asymptotic tail reads as the row drifting after it has visually arrived.
+        // Ease-in-out, not a spring: this is a one-shot entrance nothing can interrupt, and a
+        // spring's asymptotic tail reads as the row drifting after it has visually arrived. The
+        // eased onset matters as much as the eased landing — ease-out starts at full speed, which
+        // makes a row snap into motion the instant its delay expires.
         .animation(self.revealAnimation(delay: delay)) { content in
             content
                 .opacity(isVisible ? 1 : 0)
@@ -502,7 +504,7 @@ private struct GreetFeatureRow: View {
             return nil
         }
 
-        return .easeOut(duration: Tokens.Motion.revealDuration).delay(delay)
+        return .easeInOut(duration: Tokens.Motion.revealDuration).delay(delay)
     }
 }
 

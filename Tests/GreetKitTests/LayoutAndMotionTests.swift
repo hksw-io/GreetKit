@@ -23,20 +23,26 @@ struct LayoutAndMotionTests {
         #expect(Tokens.Motion.revealDelay(for: -3) == Tokens.Motion.featureBaseDelay)
     }
 
-    /// The reveal is tuned for a phone. On a Mac the same choreography reads as a marketing
-    /// entrance, so the travel and the settle time are cut.
+    /// The reveal should read as a soft cascade, so both platforms take about a second to
+    /// finish. Rushing the stagger collapses it into rows arriving at once, which is worse than
+    /// not staggering at all. What macOS cuts is the travel, not the pace.
     @Test
-    func macMotionIsShorterThanTheiOSReveal() {
+    func revealIsASlowSoftStagger() {
         let lastRowSettles = Tokens.Motion.revealDelay(for: 100) + Tokens.Motion.revealDuration
 
+        #expect(lastRowSettles > 1)
+        #expect(Tokens.Motion.revealDuration >= 0.45)
+        // A stagger under ~0.08s per row stops reading as a cascade.
+        #expect(Tokens.Motion.featureStaggerDelay >= 0.08)
+
         #if os(macOS)
-            #expect(Tokens.Motion.revealOffset == 12)
-            #expect(lastRowSettles < 0.8)
+            #expect(Tokens.Motion.revealOffset == 14)
+            #expect(lastRowSettles < 1.4)
             // Long enough to start after the sheet's own presentation animation has landed.
             #expect(Tokens.Motion.featureBaseDelay >= 0.2)
         #else
             #expect(Tokens.Motion.revealOffset == 38)
-            #expect(lastRowSettles > 1)
+            #expect(lastRowSettles < 1.6)
         #endif
     }
 
