@@ -373,7 +373,9 @@ private struct GreetHeaderSection<Content: GreetContent>: View {
                     .antialiased(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: self.iconSize, height: self.iconSize)
-                    .clipShape(RoundedRectangle(cornerRadius: self.iconSize * Tokens.Radius.iconScale))
+                    .clipShape(.rect(
+                        cornerRadius: self.iconSize * Tokens.Radius.iconScale,
+                        style: .continuous))
                     .accessibilityHidden(true)
             }
 

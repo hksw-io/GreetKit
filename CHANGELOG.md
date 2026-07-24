@@ -23,6 +23,8 @@ All notable changes to GreetKit are recorded here. The format follows
   the platform supplies the pressed, hovered, focused, disabled, and Increase Contrast treatments
   it previously faked. On macOS the button now reacts to the pointer and takes a focus ring.
 
+- The app icon clips with a continuous corner curve, matching the squircle Apple uses for app icons.
+  It was the one rounded rectangle in the package still using the circular-arc default.
 - `GreetBackground.system` draws nothing instead of painting an opaque window or system background
   colour full-bleed. Sheets carry their own material on both platforms, and covering it is what made
   the default presentation look unlike a system sheet.
