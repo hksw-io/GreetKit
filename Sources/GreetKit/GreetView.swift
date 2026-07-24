@@ -475,14 +475,34 @@ private struct GreetFeatureRow: View {
 
             Spacer(minLength: 0)
         }
-        .opacity(isVisible ? 1 : 0)
-        .offset(y: isVisible ? 0 : (self.reduceMotion ? 0 : Tokens.Motion.revealOffset))
-        // An ease-out curve, not a spring. The reveal is a one-shot entrance that nothing can
-        // interrupt or redirect, and a spring's asymptotic tail reads as the row drifting after
-        // it has visually arrived. Springs stay where they earn their keep: the route transition.
-        .animation(
-            self.reduceMotion ? nil : .easeOut(duration: Tokens.Motion.revealDuration).delay(delay),
-            value: isVisible)
+        // Scoped to the two modifiers that do the revealing, and nothing else.
+        //
+        // `.animation(_:value:)` only controls *when* an animation fires; it still animates every
+        // animatable difference in the subtree at that moment. So anything else settling on the
+        // same frame — a `@ScaledMetric` resolving, the description rewrapping — got swept into
+        // the reveal's transaction and animated with the row's delay, which read as the text
+        // jumping and shaking before it landed. The body form animates only what it wraps, so
+        // layout that settles underneath applies instantly and invisibly.
+        //
+        // An ease-out curve, not a spring: this is a one-shot entrance nothing can interrupt, and
+        // a spring's asymptotic tail reads as the row drifting after it has visually arrived.
+        .animation(self.revealAnimation(delay: delay)) { content in
+            content
+                .opacity(isVisible ? 1 : 0)
+                .offset(y: isVisible ? 0 : self.revealOffset)
+        }
+    }
+
+    private var revealOffset: CGFloat {
+        self.reduceMotion ? 0 : Tokens.Motion.revealOffset
+    }
+
+    private func revealAnimation(delay: Double) -> Animation? {
+        guard !self.reduceMotion else {
+            return nil
+        }
+
+        return .easeOut(duration: Tokens.Motion.revealDuration).delay(delay)
     }
 }
 

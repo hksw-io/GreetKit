@@ -31,7 +31,9 @@ struct LayoutAndMotionTests {
 
         #if os(macOS)
             #expect(Tokens.Motion.revealOffset == 12)
-            #expect(lastRowSettles < 0.6)
+            #expect(lastRowSettles < 0.8)
+            // Long enough to start after the sheet's own presentation animation has landed.
+            #expect(Tokens.Motion.featureBaseDelay >= 0.2)
         #else
             #expect(Tokens.Motion.revealOffset == 38)
             #expect(lastRowSettles > 1)
