@@ -1,5 +1,7 @@
 # GreetKit
 
+[![CI](https://github.com/hksw-io/GreetKit/actions/workflows/ci.yml/badge.svg)](https://github.com/hksw-io/GreetKit/actions/workflows/ci.yml)
+
 A reusable SwiftUI welcome sheet for iOS and macOS apps in the HK Softworks portfolio.
 
 Pure SwiftUI — the consumer owns state (loading, error, dismissal). Works with any state management approach (TCA, `@Observable`, `@State`).
@@ -22,19 +24,13 @@ domain language `Greet...`, for example `GreetView`, `GreetContent`, and
 
 ## Installation
 
-No release tags are published yet, so use the `master` branch for now:
-
-```swift
-.package(url: "https://github.com/hksw-io/GreetKit.git", branch: "master")
-```
-
-Switch to a semantic version requirement after the first release tag exists:
-
 ```swift
 .package(url: "https://github.com/hksw-io/GreetKit.git", from: "1.0.0")
 ```
 
-Or in Xcode: **File > Add Package Dependencies**, enter the URL above, and select the `master` branch until a release tag is available.
+Or in Xcode: **File > Add Package Dependencies**, enter the URL above, and choose **Up to Next Major Version** from `1.0.0`.
+
+See [CHANGELOG.md](CHANGELOG.md) for what changed between releases.
 
 ## Usage
 
@@ -173,8 +169,6 @@ GreetView(
 
 The built-in presets are `.subtle`, `.standard`, and `.expressive`. Stronger motion increases movement, speed, and gradient contrast. For finer control, pass `GreetGradientMotion(strength:)`; values are clamped from `0` to `2`, and `0` keeps the animated-gradient color field static.
 
-`.animatedMesh(primary:secondary:accent:)` remains available as a deprecated compatibility alias for `.animatedGradient(palette:motion:)`.
-
 GreetKit keeps the footer pinned while content scrolls behind it. A measured footer mask fades overflowing content only above the footer; when scrolling reaches the end, visible content is fully opaque again.
 
 ## Styling
@@ -214,7 +208,19 @@ The view is purely presentational:
 
 Route navigation state is intentionally transient and owned inside `GreetView`; persist only completed setup state in your app. Destination builders are generic at the public API and type-erased internally so call sites can return different SwiftUI views without exposing that plumbing.
 
-`GreetFeatureItem` has `Text` and `LocalizedStringResource` initializers. Prefer the initializer with an explicit `id`; the old ID-less initializers remain only for compatibility and are deprecated.
+`GreetFeatureItem` has `Text` and `LocalizedStringResource` initializers. Both require an explicit `id`, because `features` is normally a computed property and a generated identity would change on every evaluation.
+
+## Accessibility
+
+The library supplies no user-facing copy of its own, including for VoiceOver. While `isLoading` is `true` the primary button announces `primaryButtonLoadingAccessibilityValue`, which defaults to `Text("Loading")` — override it on your `GreetContent` to announce a localized string:
+
+```swift
+var primaryButtonLoadingAccessibilityValue: Text {
+    Text(String(localized: "onboarding.action.loading"))
+}
+```
+
+Feature icons and the app icon are hidden from VoiceOver; feature labels carry the header trait and read separately from their descriptions. Reduce Motion removes the feature reveal animation, the route slide transitions, and the animated gradient's movement.
 
 ## Local development
 
@@ -223,6 +229,14 @@ Run the package tests from the package root:
 ```sh
 swift test
 ```
+
+The iOS build path is not covered by `swift test`, so check it too when touching platform-conditional code:
+
+```sh
+xcodebuild -scheme GreetKit -destination 'generic/platform=iOS' build
+```
+
+CI runs all three on every push and pull request.
 
 ## License
 

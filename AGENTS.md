@@ -34,11 +34,15 @@ Instructions for agents working in this repository. RFC 2119 keywords apply.
 - Cover public API behavior, protocol defaults, optional content combinations, callbacks, binding behavior, loading/error states, and regression cases.
 - UI-facing changes need automated construction/smoke coverage and manual or preview verification across varied screen sizes, orientations, and devices/windows.
 - Run `swift test` before calling work complete. If the change is UI-heavy, also exercise Xcode previews or an equivalent local host app.
+- `swift test` builds for macOS only. When a change touches platform-conditional code, also run `xcodebuild -scheme GreetKit -destination 'generic/platform=iOS' build`.
+- Keep the pure helpers (layout, mask, motion, and route state math) free of SwiftUI view types so they stay unit-testable without a hosted view.
 - Run `git diff --check` before finalizing.
+- CI (`.github/workflows/ci.yml`) runs the macOS build, the tests, and the iOS build. Keep it green.
 
 ## Documentation and Dependencies
 
 - Use Sosumi for current Apple documentation when SwiftUI, platform APIs, or Human Interface Guidelines details matter.
 - Use Context7 for current, version-specific documentation for non-Apple libraries.
 - Keep README examples aligned with public APIs whenever API behavior changes.
+- Record every public API or behavior change under `## [Unreleased]` in `CHANGELOG.md`.
 - Use semantic commit messages when committing changes, such as `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, or `chore:`.
