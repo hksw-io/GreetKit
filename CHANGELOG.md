@@ -39,8 +39,10 @@ All notable changes to GreetKit are recorded here. The format follows
 - Motion splits by platform. `Tokens.Motion` was the only token group with no platform branch, so
   the Mac got the iPhone's 38pt staggered reveal and waited over a second for the last feature row
   to settle. macOS now uses a 12pt travel and roughly a third of the settle time; iOS is unchanged.
-- Animations use springs (`.smooth`) instead of `.easeOut`/`.easeInOut`, and route transitions use
-  the built-in `.push(from:)` rather than a hand-built asymmetric move-and-fade.
+- The route transition uses a spring (`.smooth`) and the built-in `.push(from:)` rather than
+  `.easeInOut` over a hand-built asymmetric move-and-fade. The feature reveal keeps its ease-out
+  curve: it is a one-shot entrance nothing can interrupt, and a spring's tail reads as the row
+  drifting after it has arrived.
 - macOS sheets are window shaped. The 320x620 floor was an iPhone aspect on a desktop; the minimum
   is now 480x420 with an ideal of 560x520, and the sheet also reports an ideal size instead of only
   a minimum. Override it with `.presentationSizing(_:)` on the presentation.

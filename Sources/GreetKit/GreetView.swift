@@ -477,8 +477,11 @@ private struct GreetFeatureRow: View {
         }
         .opacity(isVisible ? 1 : 0)
         .offset(y: isVisible ? 0 : (self.reduceMotion ? 0 : Tokens.Motion.revealOffset))
+        // An ease-out curve, not a spring. The reveal is a one-shot entrance that nothing can
+        // interrupt or redirect, and a spring's asymptotic tail reads as the row drifting after
+        // it has visually arrived. Springs stay where they earn their keep: the route transition.
         .animation(
-            self.reduceMotion ? nil : .smooth(duration: Tokens.Motion.revealDuration).delay(delay),
+            self.reduceMotion ? nil : .easeOut(duration: Tokens.Motion.revealDuration).delay(delay),
             value: isVisible)
     }
 }
