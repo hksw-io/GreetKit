@@ -6,6 +6,19 @@ All notable changes to GreetKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking.** The primary button is now the system prominent glass button
+  (`.buttonStyle(.glassProminent)`) instead of a hand-drawn pill. `GreetStyle.tint` colors it, and
+  the platform supplies the pressed, hovered, focused, disabled, and Increase Contrast treatments
+  it previously faked. On macOS the button now reacts to the pointer and takes a focus ring.
+
+### Removed
+
+- **Breaking.** `GreetStyle.primaryButtonProgressTint`. The in-button progress view now inherits a
+  legible color from the button style, so the previous hardcoded `.white` fallback is gone.
+  `primaryButtonForegroundColor` remains as an opt-in override of the label color.
+
 ## [1.0.0] - 2026-07-24
 
 First tagged release. Everything before this tag was consumed from the `master` branch.

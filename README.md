@@ -188,11 +188,12 @@ GreetView(
         titleColor: .primary,
         featureIconColor: .mint,
         primaryButtonForegroundColor: .white,
-        primaryButtonProgressTint: .white,
         secondaryButtonColor: .secondary))
 ```
 
 `GreetBackground` controls the surface behind the sheet content. `GreetStyle` controls foreground roles such as title, subtitle, feature rows, primary button text, and secondary button text. Any color you leave as `nil` uses the standard system treatment.
+
+The primary button is the system prominent glass button, so `tint` colors it and the platform supplies the pressed, hovered, focused, disabled, and high-contrast treatments. `primaryButtonForegroundColor` overrides the label color when an app needs one; leave it `nil` to let the system pick a legible color for your tint.
 
 ## State ownership
 

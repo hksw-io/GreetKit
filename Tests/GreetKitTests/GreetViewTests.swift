@@ -449,7 +449,6 @@ struct GreetViewTests {
             featureTitleColor: .primary,
             featureDescriptionColor: .secondary,
             primaryButtonForegroundColor: .white,
-            primaryButtonProgressTint: .white,
             secondaryButtonColor: .secondary)
 
         _ = self.styledView()

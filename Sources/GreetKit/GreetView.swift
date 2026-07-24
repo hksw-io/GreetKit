@@ -644,7 +644,11 @@ private struct GreetFeatureRow: View {
     }
 }
 
-/// The pill-shaped primary action shared by the overview footer and the route destinations.
+/// The primary action shared by the overview footer and the route destinations.
+///
+/// Uses the system prominent glass button so press, hover, focus, and the disabled and
+/// high-contrast treatments all come from the platform. The surrounding `GreetView` applies
+/// `GreetStyle.tint`, which is what colours the button.
 ///
 /// Pass `loading` only where the button can actually enter a loading state; route
 /// destinations leave it `nil` so no progress affordance is built at all.
@@ -662,22 +666,15 @@ private struct GreetPrimaryButton: View {
     var body: some View {
         Button(action: self.action) {
             self.labelContent
-                .frame(maxWidth: .infinity, minHeight: Tokens.Layout.buttonLabelMinHeight)
-                .padding(.vertical, Tokens.Platform.buttonVerticalPadding)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(self.label)
                 .greetAccessibilityValue(self.isLoading ? self.loading?.accessibilityValue : nil)
-                .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
         }
-        .buttonStyle(.plain)
-        .controlSize(.extraLarge)
+        .buttonStyle(.glassProminent)
+        .buttonBorderShape(.capsule)
+        .buttonSizing(.flexible)
+        .controlSize(.large)
         .disabled(self.isLoading)
-        .background {
-            RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous)
-                .fill(self.style.primaryButtonBackgroundStyle)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.button, style: .continuous))
-        .opacity(self.isLoading ? 0.65 : 1)
     }
 
     private var isLoading: Bool {
@@ -694,7 +691,6 @@ private struct GreetPrimaryButton: View {
                 HStack(spacing: Tokens.Spacing.small) {
                     ProgressView()
                         .controlSize(.small)
-                        .tint(self.style.resolvedPrimaryButtonProgressTint)
 
                     self.styledLabel
                 }
@@ -710,7 +706,7 @@ private struct GreetPrimaryButton: View {
             .font(.body.weight(.semibold))
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
-            .foregroundStyle(self.style.primaryButtonForegroundStyle)
+            .greetOptionalForegroundStyle(self.style.primaryButtonForegroundColor)
     }
 }
 

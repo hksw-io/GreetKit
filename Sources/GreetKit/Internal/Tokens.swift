@@ -10,7 +10,6 @@ enum Tokens {
     }
 
     enum Radius {
-        static let button: CGFloat = 24
         static let iconScale: CGFloat = 0.22
     }
 
@@ -25,7 +24,6 @@ enum Tokens {
         static let footerTopPadding: CGFloat = 20
         static let footerBottomPadding: CGFloat = 0
         static let minimumControlHeight: CGFloat = 44
-        static let buttonLabelMinHeight: CGFloat = 28
     }
 
     enum Motion {
@@ -46,7 +44,6 @@ enum Tokens {
         #if os(macOS)
             static let iconSize: CGFloat = 64
             static let featureIconSize: CGFloat = 24
-            static let buttonVerticalPadding: CGFloat = 8
             static let contentSpacing: CGFloat = 24
             static let featureSpacing: CGFloat = 20
             static let topPadding: CGFloat = 32
@@ -55,7 +52,6 @@ enum Tokens {
         #else
             static let iconSize: CGFloat = 100
             static let featureIconSize: CGFloat = 35
-            static let buttonVerticalPadding: CGFloat = 14
             static let contentSpacing: CGFloat = 38
             static let featureSpacing: CGFloat = 32
             static let topPadding: CGFloat = 32

@@ -16,34 +16,21 @@ struct GreetStyleTests {
         #expect(style.featureTitleColor == nil)
         #expect(style.featureDescriptionColor == nil)
         #expect(style.primaryButtonForegroundColor == nil)
-        #expect(style.primaryButtonProgressTint == nil)
         #expect(style.secondaryButtonColor == nil)
     }
 
+    /// The primary button draws itself with `.glassProminent` and takes its colour from the
+    /// tint `GreetView` applies, so the style carries no button background or progress role.
+    /// `primaryButtonForegroundColor` stays as an opt-in override of the system label colour.
     @Test
-    func progressTintFallsBackToWhite() {
-        #expect(GreetStyle.standard.resolvedPrimaryButtonProgressTint == .white)
-    }
-
-    @Test
-    func progressTintFollowsThePrimaryButtonForeground() {
-        let style = GreetStyle(primaryButtonForegroundColor: .black)
-
-        #expect(style.resolvedPrimaryButtonProgressTint == .black)
-    }
-
-    @Test
-    func explicitProgressTintWinsOverThePrimaryButtonForeground() {
-        let style = GreetStyle(
-            primaryButtonForegroundColor: .black,
-            primaryButtonProgressTint: .yellow)
-
-        #expect(style.resolvedPrimaryButtonProgressTint == .yellow)
+    func primaryButtonForegroundIsUnsetUntilTheConsumerOverridesIt() {
+        #expect(GreetStyle.standard.primaryButtonForegroundColor == nil)
+        #expect(GreetStyle(primaryButtonForegroundColor: .black).primaryButtonForegroundColor == .black)
     }
 
     /// `AnyShapeStyle` cannot be compared, so the resolved roles are exercised for
-    /// construction only. The colour precedence they encode is asserted through
-    /// `resolvedPrimaryButtonProgressTint` above and through the stored roles here.
+    /// construction only. The colour precedence they encode is asserted through the
+    /// stored roles here.
     @Test
     func resolvedForegroundRolesBuildForBothDefaultAndCustomColors() {
         let standard = GreetStyle.standard
@@ -55,7 +42,6 @@ struct GreetStyleTests {
             featureTitleColor: .primary,
             featureDescriptionColor: .secondary,
             primaryButtonForegroundColor: .white,
-            primaryButtonProgressTint: .white,
             secondaryButtonColor: .secondary)
 
         for style in [standard, custom] {
@@ -63,8 +49,6 @@ struct GreetStyleTests {
             _ = style.featureIconForegroundStyle
             _ = style.featureDescriptionForegroundStyle
             _ = style.secondaryButtonForegroundStyle
-            _ = style.primaryButtonForegroundStyle
-            _ = style.primaryButtonBackgroundStyle
         }
     }
 

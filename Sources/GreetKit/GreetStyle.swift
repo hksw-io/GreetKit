@@ -9,7 +9,6 @@ public struct GreetStyle: Sendable {
     public var featureTitleColor: Color?
     public var featureDescriptionColor: Color?
     public var primaryButtonForegroundColor: Color?
-    public var primaryButtonProgressTint: Color?
     public var secondaryButtonColor: Color?
 
     public static var standard: Self {
@@ -24,7 +23,6 @@ public struct GreetStyle: Sendable {
         featureTitleColor: Color? = nil,
         featureDescriptionColor: Color? = nil,
         primaryButtonForegroundColor: Color? = nil,
-        primaryButtonProgressTint: Color? = nil,
         secondaryButtonColor: Color? = nil)
     {
         self.tint = tint
@@ -34,7 +32,6 @@ public struct GreetStyle: Sendable {
         self.featureTitleColor = featureTitleColor
         self.featureDescriptionColor = featureDescriptionColor
         self.primaryButtonForegroundColor = primaryButtonForegroundColor
-        self.primaryButtonProgressTint = primaryButtonProgressTint
         self.secondaryButtonColor = secondaryButtonColor
     }
 }
@@ -54,18 +51,6 @@ extension GreetStyle {
 
     var secondaryButtonForegroundStyle: AnyShapeStyle {
         Self.foregroundStyle(for: self.secondaryButtonColor, fallback: AnyShapeStyle(.secondary))
-    }
-
-    var resolvedPrimaryButtonProgressTint: Color {
-        self.primaryButtonProgressTint ?? self.primaryButtonForegroundColor ?? .white
-    }
-
-    var primaryButtonForegroundStyle: AnyShapeStyle {
-        Self.foregroundStyle(for: self.primaryButtonForegroundColor, fallback: AnyShapeStyle(.white))
-    }
-
-    var primaryButtonBackgroundStyle: AnyShapeStyle {
-        Self.foregroundStyle(for: self.tint, fallback: AnyShapeStyle(.tint))
     }
 
     private static func foregroundStyle(for color: Color?, fallback: AnyShapeStyle) -> AnyShapeStyle {
