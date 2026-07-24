@@ -28,16 +28,17 @@ enum Tokens {
     enum Motion {
         #if os(macOS)
             // A Mac sheet travels less than a phone one — 14pt rather than 38 — but it still
-            // reveals at a readable pace. Rushing the stagger turns a soft cascade into a flicker
-            // of rows arriving at once, which is worse than not staggering at all.
+            // reveals at a readable pace.
             //
-            // The base delay also has to outlast the sheet's own presentation animation. Starting
-            // the reveal while the sheet is still moving composites one animation onto another and
-            // reads as a shake, however clean each one is on its own.
-            static let featureBaseDelay: Double = 0.25
-            static let featureStaggerDelay: Double = 0.1
-            static let maxFeatureStaggerDelay: Double = 0.5
-            static let revealDuration: Double = 0.5
+            // The first row arrives almost immediately: a long wait before anything happens reads
+            // as the sheet being slow to draw, not as choreography. The cascade earns its pace
+            // from the gap *between* rows instead, which is why the stagger is longer than the
+            // base delay. Each row also fades over a generous duration, so a row is still
+            // arriving as the next one starts.
+            static let featureBaseDelay: Double = 0.12
+            static let featureStaggerDelay: Double = 0.16
+            static let maxFeatureStaggerDelay: Double = 0.8
+            static let revealDuration: Double = 0.6
             static let revealOffset: CGFloat = 14
             static let routeTransitionDuration: Double = 0.26
         #else

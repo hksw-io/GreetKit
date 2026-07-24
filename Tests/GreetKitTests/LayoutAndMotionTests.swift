@@ -37,9 +37,11 @@ struct LayoutAndMotionTests {
 
         #if os(macOS)
             #expect(Tokens.Motion.revealOffset == 14)
-            #expect(lastRowSettles < 1.4)
-            // Long enough to start after the sheet's own presentation animation has landed.
-            #expect(Tokens.Motion.featureBaseDelay >= 0.2)
+            #expect(lastRowSettles < 1.7)
+            // The first row arrives promptly — a long wait before anything happens reads as the
+            // sheet being slow to draw. The pace comes from the gap between rows instead.
+            #expect(Tokens.Motion.featureBaseDelay <= 0.15)
+            #expect(Tokens.Motion.featureStaggerDelay > Tokens.Motion.featureBaseDelay)
         #else
             #expect(Tokens.Motion.revealOffset == 38)
             #expect(lastRowSettles < 1.6)
