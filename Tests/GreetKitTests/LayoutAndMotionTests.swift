@@ -62,7 +62,13 @@ struct LayoutAndMotionTests {
     @Test
     func footerControlsUseCompactVisualSpacingWithAccessibleSkipHeight() {
         #expect(Tokens.Layout.footerControlSpacing == Tokens.Spacing.medium)
-        #expect(Tokens.Layout.minimumControlHeight == 44)
+
+        #if os(macOS)
+            // A pointer target, not a touch target.
+            #expect(Tokens.Platform.minimumControlHeight == 28)
+        #else
+            #expect(Tokens.Platform.minimumControlHeight == 44)
+        #endif
     }
 
     @Test
@@ -71,10 +77,17 @@ struct LayoutAndMotionTests {
         #expect(Tokens.Layout.footerBottomPadding < Tokens.Layout.footerTopPadding)
     }
 
-    @Test
-    func compactSheetMinimumsLeaveRoomForContentAndFooter() {
-        #expect(Tokens.Layout.compactSheetMinWidth <= Tokens.Layout.compactWidthBreakpoint)
-        #expect(Tokens.Layout.compactSheetMinHeight > Tokens.Layout.compactSheetMinWidth)
-    }
+    /// The Mac floor is a window shape, not a phone shape: wider than it is tall, and past the
+    /// compact breakpoint so a Mac sheet never lands on the iPhone padding. iOS sets no floor —
+    /// the presentation owns the size there.
+    #if os(macOS)
+        @Test
+        func macSheetMinimumsAreWindowShaped() {
+            #expect(Tokens.Platform.sheetMinWidth > Tokens.Platform.sheetMinHeight)
+            #expect(Tokens.Platform.sheetMinWidth > Tokens.Layout.compactWidthBreakpoint)
+            #expect(Tokens.Platform.sheetIdealWidth >= Tokens.Platform.sheetMinWidth)
+            #expect(Tokens.Platform.sheetIdealHeight >= Tokens.Platform.sheetMinHeight)
+        }
+    #endif
 }
 #endif

@@ -23,6 +23,11 @@ All notable changes to GreetKit are recorded here. The format follows
   the platform supplies the pressed, hovered, focused, disabled, and Increase Contrast treatments
   it previously faked. On macOS the button now reacts to the pointer and takes a focus ring.
 
+- macOS sheets are window shaped. The 320x620 floor was an iPhone aspect on a desktop; the minimum
+  is now 480x420 with an ideal of 560x520, and the sheet also reports an ideal size instead of only
+  a minimum. Override it with `.presentationSizing(_:)` on the presentation.
+- The minimum control height splits by platform: 44pt stays on iOS as a touch target, macOS uses
+  28pt as a pointer target.
 - macOS shows the system scroll indicator again when the greet content overflows. Hiding it made a
   Mac window unable to say there was more below, especially with a mouse and always-visible
   scrollers. iOS still hides it.

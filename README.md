@@ -98,6 +98,16 @@ struct RootView: View {
 }
 ```
 
+On macOS the view carries a window-shaped minimum and ideal size so a sheet opens at sensible
+Mac proportions. Override it from the presenting code when an app wants something else:
+
+```swift
+.sheet(isPresented: $showingGreet) {
+    GreetView(...)
+        .presentationSizing(.fitted)
+}
+```
+
 For a simple welcome sheet, omit `primaryRoutes` and `primaryRouteDestination`. The primary and skip callbacks can then dismiss the sheet directly.
 
 For a chained setup flow, provide `primaryRoutes` and `primaryRouteDestination`. `onPrimary` fires first, then the library opens the first route with an in-sheet transition. Do not dismiss from `onPrimary` when using a route chain. Finish in `onPrimaryRoutesComplete` after the last route. `primaryRouteNextButtonText` and `primaryRouteDoneButtonText` customize the route controls.

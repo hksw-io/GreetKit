@@ -202,8 +202,10 @@ public struct GreetView<Content: GreetContent>: View {
         .greetContainerWidth(self.$containerWidth)
         #if os(macOS)
             .frame(
-                minWidth: Tokens.Layout.compactSheetMinWidth,
-                minHeight: Tokens.Layout.compactSheetMinHeight)
+                minWidth: Tokens.Platform.sheetMinWidth,
+                idealWidth: Tokens.Platform.sheetIdealWidth,
+                minHeight: Tokens.Platform.sheetMinHeight,
+                idealHeight: Tokens.Platform.sheetIdealHeight)
         #endif
             .onAppear {
                 self.featuresVisible = true
@@ -307,8 +309,10 @@ private struct GreetPrimaryDestinationContainer<Destination: View>: View {
         }
         #if os(macOS)
             .frame(
-                minWidth: Tokens.Layout.compactSheetMinWidth,
-                minHeight: Tokens.Layout.compactSheetMinHeight)
+                minWidth: Tokens.Platform.sheetMinWidth,
+                idealWidth: Tokens.Platform.sheetIdealWidth,
+                minHeight: Tokens.Platform.sheetMinHeight,
+                idealHeight: Tokens.Platform.sheetIdealHeight)
         #endif
     }
 }
@@ -343,8 +347,10 @@ private struct GreetPrimaryRouteDestinationContainer<Content: GreetContent, Dest
             .greetContainerWidth(self.$containerWidth)
         #if os(macOS)
             .frame(
-                minWidth: Tokens.Layout.compactSheetMinWidth,
-                minHeight: Tokens.Layout.compactSheetMinHeight)
+                minWidth: Tokens.Platform.sheetMinWidth,
+                idealWidth: Tokens.Platform.sheetIdealWidth,
+                minHeight: Tokens.Platform.sheetMinHeight,
+                idealHeight: Tokens.Platform.sheetIdealHeight)
         #endif
     }
 
@@ -566,7 +572,7 @@ private struct GreetFooterSection<Content: GreetContent>: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(
                             maxWidth: .infinity,
-                            minHeight: Tokens.Layout.minimumControlHeight,
+                            minHeight: Tokens.Platform.minimumControlHeight,
                             alignment: .top)
                         .contentShape(Rectangle())
                 }

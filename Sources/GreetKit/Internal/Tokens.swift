@@ -18,12 +18,9 @@ enum Tokens {
         static let compactHorizontalPadding: CGFloat = 16
         static let regularHorizontalPadding: CGFloat = 24
         static let compactWidthBreakpoint: CGFloat = 390
-        static let compactSheetMinWidth: CGFloat = 320
-        static let compactSheetMinHeight: CGFloat = 620
         static let footerControlSpacing: CGFloat = Spacing.medium
         static let footerTopPadding: CGFloat = 20
         static let footerBottomPadding: CGFloat = 0
-        static let minimumControlHeight: CGFloat = 44
     }
 
     enum Motion {
@@ -48,7 +45,14 @@ enum Tokens {
             static let featureSpacing: CGFloat = 20
             static let topPadding: CGFloat = 32
             static let bottomPadding: CGFloat = 20
-            static let scrollEdgeFadeHeight: CGFloat = 60
+            /// A Mac window is wider than it is tall. The old 320x620 floor was an iPhone
+            /// shape on a desktop.
+            static let sheetMinWidth: CGFloat = 480
+            static let sheetMinHeight: CGFloat = 420
+            static let sheetIdealWidth: CGFloat = 560
+            static let sheetIdealHeight: CGFloat = 520
+            /// A pointer target, not a touch target.
+            static let minimumControlHeight: CGFloat = 28
         #else
             static let iconSize: CGFloat = 100
             static let featureIconSize: CGFloat = 35
@@ -56,7 +60,7 @@ enum Tokens {
             static let featureSpacing: CGFloat = 32
             static let topPadding: CGFloat = 32
             static let bottomPadding: CGFloat = 24
-            static let scrollEdgeFadeHeight: CGFloat = 80
+            static let minimumControlHeight: CGFloat = 44
         #endif
     }
 
