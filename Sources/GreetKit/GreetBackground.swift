@@ -282,13 +282,34 @@ private struct GreetAnimatedGradientBackground: View {
     let reduceMotion: Bool
     let accessibility: GreetGradientAccessibility
 
+    #if os(macOS)
+        @Environment(\.controlActiveState) private var controlActiveState
+    #endif
+
     private static let baseCycleDuration: TimeInterval = 10
 
-    var body: some View {
-        let isPaused = self.reduceMotion || self.motion.clampedStrength == 0
+    /// A Mac greet window can sit behind another app for as long as the person leaves it there.
+    /// Nobody is watching the gradient at that point, so stop drawing it.
+    private var isAppInactive: Bool {
+        #if os(macOS)
+            self.controlActiveState == .inactive
+        #else
+            false
+        #endif
+    }
 
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: isPaused)) { timeline in
-            let phase = isPaused
+    var body: some View {
+        // A static field pins the phase; an inactive app only stops the clock. Pinning the phase
+        // in the inactive case too would snap the blobs back to their start position and pop when
+        // the person came back. Deriving the phase from the timeline date instead means resuming
+        // is seamless — it lands wherever wall-clock time says it should.
+        let isStatic = self.reduceMotion || self.motion.clampedStrength == 0
+
+        TimelineView(.animation(
+            minimumInterval: 1.0 / 30.0,
+            paused: isStatic || self.isAppInactive))
+        { timeline in
+            let phase = isStatic
                 ? 0
                 : timeline.date.timeIntervalSinceReferenceDate / (Self.baseCycleDuration / self.motion.speedScale)
 
