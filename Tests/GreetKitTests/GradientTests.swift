@@ -107,6 +107,22 @@ struct GradientTests {
         #expect(palette.tones(for: .dark).primary == .indigo)
     }
 
+    /// Supporting tones used to be fixed hues — `.cyan` and `.mint` regardless of brand — so the
+    /// field read as three unrelated colours. They are now washed from the brand itself.
+    @Test
+    func brandPaletteDerivesSupportingTonesFromTheBrand() {
+        let red = GreetGradientPalette.brand(.red)
+        let blue = GreetGradientPalette.brand(.blue)
+
+        #expect(red.light.secondary != blue.light.secondary)
+        #expect(red.light.accent != blue.light.accent)
+        #expect(red.dark.secondary != blue.dark.secondary)
+        #expect(red.dark.accent != blue.dark.accent)
+
+        #expect(red.light.secondary != Color.cyan)
+        #expect(red.light.accent != Color.mint)
+    }
+
     @Test
     func standardPaletteUsesTheDefaultBrandColor() {
         #expect(GreetGradientPalette.standard.tones(for: .light).primary == .blue)

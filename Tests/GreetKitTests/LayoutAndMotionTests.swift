@@ -124,9 +124,12 @@ struct LayoutAndMotionTests {
         #endif
     }
 
+    /// The button must clear the sheet edge rather than hug it, without floating so high that the
+    /// bar looks detached. A route page has no skip button under the primary one, so nothing else
+    /// holds it off the edge.
     @Test
-    func footerUsesAsymmetricPaddingToSitCloserToBottomEdge() {
-        #expect(Tokens.Layout.footerBottomPadding == 0)
+    func footerUsesAsymmetricPaddingThatStillClearsTheBottomEdge() {
+        #expect(Tokens.Layout.footerBottomPadding > 0)
         #expect(Tokens.Layout.footerBottomPadding < Tokens.Layout.footerTopPadding)
     }
 

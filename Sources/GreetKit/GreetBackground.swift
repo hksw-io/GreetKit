@@ -71,27 +71,32 @@ public struct GreetGradientPalette: Sendable {
     public var light: Tones
     public var dark: Tones
 
-    public static var standard: Self {
-        self.brand(.blue)
-    }
+    public static let standard = Self.brand(.blue)
 
     public init(light: Tones, dark: Tones? = nil) {
         self.light = light
         self.dark = dark ?? light
     }
 
+    /// The brand colour becomes `primary`, and the supporting tones are that same colour washed
+    /// toward the platform surface, so the field reads as one colour rather than as three unrelated
+    /// hues. Because the surface is light in light mode and dark in dark mode, the same wash lifts
+    /// the palette in one and deepens it in the other.
+    ///
+    /// Dark mode washes less: a dark surface swallows chroma faster, so an equal mix would flatten
+    /// the supporting tones into the background.
     public static func brand(_ brand: Color) -> Self {
         Self(
             light: Tones(
                 base: Tokens.background,
                 primary: brand,
-                secondary: .cyan,
-                accent: .mint),
+                secondary: brand.mix(with: Tokens.background, by: 0.30),
+                accent: brand.mix(with: Tokens.background, by: 0.55)),
             dark: Tones(
                 base: Tokens.background,
                 primary: brand,
-                secondary: .purple,
-                accent: .cyan))
+                secondary: brand.mix(with: Tokens.background, by: 0.22),
+                accent: brand.mix(with: Tokens.background, by: 0.42)))
     }
 
     func tones(for colorScheme: ColorScheme) -> Tones {
@@ -146,6 +151,8 @@ public struct GreetBackground {
 
     let storage: Storage
 
+    // Left as computed: GreetBackground is not Sendable — its `custom` case holds a plain
+    // closure — so a static let would be a concurrency-unsafe global.
     public static var system: Self { Self(storage: .system) }
     public static var softGradient: Self { Self(storage: .softGradient(brand: nil, palette: nil)) }
 
@@ -544,28 +551,32 @@ enum GreetGradientVisualTuning {
             bottomVeilOpacity: 0.78)
     }
 
+    /// The veil is the surface colour painted back over the field. It is what keeps the gradient
+    /// behind the content rather than competing with it, and light mode previously had almost none
+    /// — a 0.38 base tint under a 0.04 veil, where `soft` reaches 0.78. That inversion is why the
+    /// animated background read heavy in light mode and calm in dark.
     static func animated(colorScheme: ColorScheme) -> GreetAnimatedGradientTuning {
         if colorScheme == .dark {
             return GreetAnimatedGradientTuning(
-                baseTintOpacity: 0.26,
-                primaryBlobOpacity: 0.46,
-                secondaryBlobOpacity: 0.40,
-                accentBlobOpacity: 0.38,
-                trailingBlobOpacity: 0.28,
-                topVeilOpacity: 0.04,
-                bottomVeilOpacity: 0.18,
-                blobBlurRatio: 0.028)
+                baseTintOpacity: 0.14,
+                primaryBlobOpacity: 0.30,
+                secondaryBlobOpacity: 0.24,
+                accentBlobOpacity: 0.22,
+                trailingBlobOpacity: 0.18,
+                topVeilOpacity: 0.30,
+                bottomVeilOpacity: 0.55,
+                blobBlurRatio: 0.036)
         }
 
         return GreetAnimatedGradientTuning(
-            baseTintOpacity: 0.38,
-            primaryBlobOpacity: 0.46,
-            secondaryBlobOpacity: 0.42,
-            accentBlobOpacity: 0.42,
-            trailingBlobOpacity: 0.32,
-            topVeilOpacity: 0,
-            bottomVeilOpacity: 0.04,
-            blobBlurRatio: 0.028)
+            baseTintOpacity: 0.16,
+            primaryBlobOpacity: 0.30,
+            secondaryBlobOpacity: 0.26,
+            accentBlobOpacity: 0.24,
+            trailingBlobOpacity: 0.20,
+            topVeilOpacity: 0.20,
+            bottomVeilOpacity: 0.38,
+            blobBlurRatio: 0.036)
     }
 }
 

@@ -11,9 +11,7 @@ public struct GreetStyle: Sendable {
     public var primaryButtonForegroundColor: Color?
     public var secondaryButtonColor: Color?
 
-    public static var standard: Self {
-        Self()
-    }
+    public static let standard = Self()
 
     public init(
         tint: Color? = nil,

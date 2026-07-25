@@ -20,7 +20,9 @@ enum Tokens {
         static let compactWidthBreakpoint: CGFloat = 390
         static let footerControlSpacing: CGFloat = Spacing.medium
         static let footerTopPadding: CGFloat = 20
-        static let footerBottomPadding: CGFloat = 0
+        /// The button needs to sit off the sheet edge, not against it. On the overview the skip
+        /// button hid this, but a route page has no skip, so the primary button landed on the edge.
+        static let footerBottomPadding: CGFloat = Spacing.large
     }
 
     /// Kept here rather than in `Platform` so the shared `revealDelay(for:)` stays next to the

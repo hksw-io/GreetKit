@@ -180,6 +180,8 @@ public struct GreetView<Content: GreetContent>: View {
                     reduceMotion: self.reduceMotion,
                     style: self.style)
             }
+            // Mac users expect to be able to select and copy this copy out of a window.
+            .textSelection(.enabled)
             .frame(maxWidth: Tokens.Layout.contentMaxWidth)
             .frame(maxWidth: .infinity)
             .greetHorizontalPadding(containerWidth: self.containerWidth)

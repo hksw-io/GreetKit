@@ -6,6 +6,32 @@ All notable changes to GreetKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The brand-derived gradient palette is calmer and reads as one colour. `GreetGradientPalette.brand(_:)`
+  used to pair any brand colour with fixed `.cyan` and `.mint` (light) or `.purple` and `.cyan`
+  (dark), so the field was three unrelated hues; the supporting tones are now the brand washed
+  toward the platform surface. Since that surface is light in light mode and dark in dark mode, the
+  same wash lifts the palette in one and deepens it in the other.
+- `.animatedGradient` is substantially softer. Light mode had carried the *highest* base tint of
+  either scheme (0.38 against dark's 0.26) under almost no veil (0.04, where `.softGradient` reaches
+  0.78) — the veil is the surface colour painted back over the field, so with it near zero nothing
+  tempered the colour. Veils are up and tints, blob opacities, and blur are retuned in both schemes.
+- Not source-breaking, but every caller using a brand-derived gradient will look different.
+  `.softGradient` shares the same palette factory, so its hues change too; its own intensity tuning
+  is untouched. Explicit `palette:` overrides are unaffected.
+- The title, subtitle, and feature rows are selectable, which Mac users expect of a window they may
+  want to copy out of.
+
+### Fixed
+
+- The primary button sat against the bottom edge of the sheet. `footerBottomPadding` was zero, which
+  the overview hid because the skip button sits below the primary one — but a route page has no skip
+  button, so nothing held it off the edge.
+
+Ported from ReleaseKit, which had the same gradient defect. Both packages ship in the same app, so
+the values match.
+
 ## [2.0.0] - 2026-07-25
 
 Makes the package feel native on each platform rather than presenting one iOS design on both, and
